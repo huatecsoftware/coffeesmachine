@@ -1,0 +1,396 @@
+.flexCol {
+    display: flex;
+    flex-direction: column;
+}
+
+.flexRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.container::before {
+    content: '';
+    width: 100vw;
+    height: 84vh;
+    filter: blur(2px);
+    position: absolute;
+    background: url(../assets/back2.jpg);
+    background-size: 100% 100%
+}
+
+.header {
+    width: 100vw;
+    height: 10vh;
+    background: black;
+    align-items: center
+}
+
+.logo {
+    width: 20vw;
+    height: 6vh;
+    margin-left: 24px;
+    background: url(../assets/logo.png);
+    background-size: 100% 100%
+}
+
+.name {
+    width: 78vw;
+    color: snow;
+    font-size: 3vw;
+    font-weight: bold;
+    user-select: none;
+    margin-left: 12vw;
+    font-family: 'SimSun';
+    text-shadow: 0 0 15px aqua;
+}
+
+.bread {
+    width: 38vw;
+    height: 6vh;
+    align-items: center
+}
+
+.bread>span, .success~span {
+    font-size: 1.5vw;
+    font-weight: bold;
+    font-family: 'SimSun';
+}
+
+.record {
+    font-size: 2vw;
+    margin-top: 12px;
+    font-family: 'simsun';
+}
+
+@keyframes scale {
+    0% {
+        width: 20px
+    }
+    50% {
+        width: 10px
+    }
+    100% {
+        width: 20px
+    }
+}
+
+.volume {
+    width: 20px;
+    height: 4px;
+    background: black;
+    animation: scale 1s infinite
+}
+
+@keyframes hintScroll {
+    from {
+        left: 60%
+    }
+    to {
+        left: -60%
+    }
+}
+
+.scrollWord {
+    width: 35%;
+    height: 5vh;
+    z-index: 999;
+    font-size: 1.5vw;
+    font-weight: bold;
+    position: absolute;
+    font-family: 'SimSun';
+}
+
+.scrollWord {
+    top: 75vh;
+    animation: hintScroll 20s infinite
+}
+
+.hintStyle {
+    color: red;
+    font-weight: bold
+}
+
+.followTable {
+    height: 84vh;
+    z-index: 999;
+    width: 33.33vw;
+    border-right: 4px groove snow;
+}
+
+:global(.ant-table-title) {
+    font-size: 1.5vw;
+    text-align: center;
+    user-select: none;
+    font-weight: bold;
+    font-family: 'SimSun';
+}
+
+:global(.ant-form-item-required), :global(.ant-steps-item-title) {
+    color: black;
+    user-select: none;
+    font-family: 'SimSun';
+    font-weight: bold!important;
+}
+
+:global(.ant-result) {
+    padding: 0!important
+}
+
+:global(.ant-table-placeholder) {
+    background: transparent!important;
+}
+
+:global(.ant-calendar-body td), :global(.ant-calendar-body span) {
+    font-size: 1vw;
+}
+
+:global(.ant-calendar-picker-input) {
+    background: transparent;
+    font-size: 1vw;
+    outline: none;
+    border: none;
+}
+
+:global(.ant-calendar-range-picker-input::placeholder) {
+    color: black!important
+}
+
+th, td {
+    font-size: 1.5vw;
+    overflow: hidden;
+    user-select: none;
+    font-family: 'SimSun';
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: bold!important;
+    text-align: center!important;
+    background: transparent!important
+}
+
+.odd {
+    background: rgba(95, 229, 247, 0.618)
+}
+
+.even {
+    background: rgba(222, 184, 135, 0.618);
+}
+
+.right, .right2 {
+    z-index: 999;
+    width: 33.33vw;
+    align-items: center;
+    justify-content: space-around;
+}
+
+@keyframes orangeAnima {
+    0% {
+        box-shadow: none;
+    }
+    50% {
+        box-shadow: inset 0 0 50px orange;
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
+@keyframes redAnima {
+    0% {
+        box-shadow: none;
+    }
+    50% {
+        box-shadow: inset 0 0 50px red;
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
+.errLevel1 {
+    animation: orangeAnima 2s infinite
+}
+
+.errLevel2 {
+    animation: redAnima 2s infinite
+}
+
+.errorStyle {
+    color: green;
+    font-size: 3vw;
+    font-weight: bold;
+    font-family: 'simsun';
+}
+
+.errorStyle1 {
+    font-size: 3vw;
+    color: orange;
+    font-weight: bold;
+    font-family: 'simsun';
+}
+
+.errorStyle2 {
+    color: red;
+    font-size: 3vw;
+    font-weight: bold;
+    font-family: 'simsun';
+}
+
+.rangePicker {
+    position: absolute;
+    top: 17vh;
+    left: 70vw
+}
+
+.stateBtns {
+    width: 100vw;
+    height: 10vh;
+    align-items: center;
+    justify-content: space-around
+}
+
+.btnStyle {
+    height: 5vh;
+    width: 12vw;
+    font-size: 1.5vw;
+    font-family: 'simsun';
+}
+
+.epuipment {
+    width: 100vw;
+    height: 74vh;
+    justify-content: space-around
+}
+
+.lambOn {
+    width: 20px;
+    z-index: 999;
+    height: 20px;
+    margin-right: 1vw;
+    background: green;
+    border-radius: 50%
+}
+
+.lambOff {
+    width: 20px;
+    z-index: 999;
+    height: 20px;
+    margin-right: 1vw;
+    background: red;
+    border-radius: 50%
+}
+
+.equipTitle {
+    z-index: 999;
+    font-size: 1.5vw;
+    font-family: 'simsun';
+    font-weight: bold
+}
+
+.lambFont {
+    z-index: 999;
+    font-family: 'SimSun';
+    font-size: 1.5vw;
+    font-weight: bold;
+}
+
+.stateBox {
+    height: 74vh;
+    justify-content: space-around
+}
+
+.left {
+    width: 66.66vw;
+    height: 90vh;
+    z-index: 999;
+    border-right: 4px groove snow;
+}
+
+.right {
+    background: url(../assets/note1.png);
+    background-size: 100% 100%;
+}
+
+.right2 {
+    background: url(../assets/back4.jpg);
+    background-size: 100% 100%;
+}
+
+.lessOrder {
+    width: 33.33vw;
+    height: 90vh;
+}
+
+.tasteName {
+    font-size: 2vw;
+    margin-top: 12px;
+    font-weight: bold;
+    align-items: center;
+    font-family: 'simsun';
+    justify-content: center;
+}
+
+.taste, .taste1 {
+    width: 25vw;
+    height: 50vh;
+    z-index: 999;
+    border-radius: 5%;
+}
+
+.taste:hover, .taste1:hover {
+    cursor: pointer;
+}
+
+.taste {
+    background-image: url(../assets/taste1.webp);
+    background-size: 100% 100%
+}
+
+.taste1 {
+    background-image: url(../assets/taste2.webp);
+    background-size: 100% 100%
+}
+
+.tasteType {
+    height: 60vh;
+    width: 66.66vw;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: space-around;
+    border-bottom: 4px groove snow;
+}
+
+.orderInfo {
+    width: 12vw;
+    height: 5vh;
+    font-family: 'SimSun';
+    font-weight: bold;
+}
+
+.orderInfo>span:first-child {
+    margin-right: auto;
+}
+
+.stepContainer {
+    height: 10vh;
+    z-index: 9999;
+    background: snow;
+    width: 66.3vw!important;
+}
+
+.steps {
+    height: 10vh;
+    z-index: 9999;
+    background: snow;
+    align-items: center;
+    width: 60vw!important;
+    margin-left: 3vw!important;
+}
+
+.myForm {
+    height: 20vh;
+    width: 66.3vw;
+    background: snow;
+    align-items: center;
+    justify-content: center;
+    padding-top: 48px!important;
+}
