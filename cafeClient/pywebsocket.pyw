@@ -111,8 +111,11 @@ async def AI(websocket, path):
                             play(BASE_DIR+'/wav/const/不认识.wav')
             else:
                 onlyOnce = True
+            wave = []
+            if os.path.exists(BASE_DIR + "/wave.txt"):
+                wave = np.loadtxt(BASE_DIR+'/wave.txt').tolist()
             await asyncio.sleep(1)
-            await websocket.send(json.dumps({'person': person}))
+            await websocket.send(json.dumps({'person': person, 'wave': wave}))
 
 start_server = websockets.serve(PLCServer, '127.0.0.1', 8765)
 asyncio.get_event_loop().run_until_complete(start_server)
