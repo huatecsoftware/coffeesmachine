@@ -126,6 +126,9 @@ def failOrder(request):
 
 @csrf_exempt
 def faceRecognition(request):
+    """  
+        智能模式开启语音和视频进程
+    """
     recordP = Process(target=recordProcess)
     recordP.start()
     cameraP = Process(target=cameraProcess)
@@ -139,6 +142,9 @@ def faceRecognition(request):
 
 @csrf_exempt
 def deleteTempFile(request):
+    """  
+        放弃注册删除图片
+    """
     global newPic
     if os.path.exists(BASE_DIR+'/faces/%s' % newPic):
         os.remove(BASE_DIR+'/faces/%s' % newPic)
@@ -147,6 +153,9 @@ def deleteTempFile(request):
 
 @csrf_exempt
 def addUser(request):
+    """ 
+        用户注册函数
+    """
     param = json.loads(request.body)
     res = 'ok'
     userNums = User.objects.filter(Q(phone=param['userParam']['phone']))
@@ -172,6 +181,9 @@ newPic = ''
 
 @csrf_exempt
 def photograph(request):
+    """ 
+        页面点击拍照按钮
+    """
     global newPic
     param = json.loads(request.body)
     newPic = '%s%s.jpg' % (param["name"], param["phone"][-4:])

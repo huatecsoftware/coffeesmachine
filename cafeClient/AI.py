@@ -374,7 +374,7 @@ def STT(audioContent):
         'Content-Length': len(audioContent)
     }
     conn = http.client.HTTPConnection(host)
-    conn.request(method='POST', url='http://nls-gateway.cn-shanghai.aliyuncs.com/stream/v1/asr?appkey=&format=pcm&sample_rate=16000&enable_punctuation_prediction=false&enable_inverse_text_normalization=true',
+    conn.request(method='POST', url='http://nls-gateway.cn-shanghai.aliyuncs.com/stream/v1/asr?appkey=iD6WHk9lXQLupV45&format=pcm&sample_rate=16000&enable_punctuation_prediction=false&enable_inverse_text_normalization=true',
                  body=audioContent, headers=httpHeaders)
     response = conn.getresponse()
     body = response.read()
@@ -387,6 +387,7 @@ def STT(audioContent):
             print('Recognize result: ' + result)
             arr1, arr2 = ['清', '青', '轻', '请', '冰', '新',
                           '情', '听', '停', '金', '京', '经'], ['农', '浓', '本', '能', '檬', '侬']
+            #热词唤醒，唤醒后状态改为wake，是否取消改为False
             if ('花' in result) or ('华' in result):
                 AIStatus = 'wake'
                 isCancle = False
@@ -396,15 +397,19 @@ def STT(audioContent):
                     name = f.readline()
                     f.close()
                     os.remove(BASE_DIR+'/known.txt')
+                    #判断是否认识这个人，如果认识则默认为唤醒状态
                     if name == 'known':
                         AIStatus = 'wake'
                     else:
+                        #如果不认识，首先判断镜头中是否有人，如果没人则忽略周围声音，如果有人，则回复不认识的语音
                         with open(BASE_DIR + "/personNum.txt", "r") as f:
                             persons = int(f.readline())
                             f.close()
                             os.remove(BASE_DIR + "/personNum.txt")
                             if persons != 0:
                                 play(BASE_DIR+'/wav/const/不认识.wav')
+                    #如果是唤醒状态，并且认识这个人，这个人也没有说取消订单字样，则进行后续逻辑
+                    #如果有听到取消订单则状态改为sleep，是否取消改为True
                     if AIStatus == 'wake' and name == 'known' and not isCancle:
                         if ('消订' in result) or ('取消' in result) or ('交订' in result) or ('订单' in result):
                             play(BASE_DIR+'/wav/const/取消订单.wav')
@@ -501,3 +506,4 @@ class GenderThread (threading.Thread):
             return self.res
         except:
             return None
+

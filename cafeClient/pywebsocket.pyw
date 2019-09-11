@@ -79,6 +79,10 @@ onlyOnce = True
 
 
 async def AI(websocket, path):
+    """  
+        智能模式语音问候
+        如果是第一次注册则进行语音合成，下次同一个人再次识别时直接播放上次保存的文件，减小网络开销
+    """
     global onlyOnce
     async for message in websocket:
         while True:
