@@ -22,6 +22,7 @@ export default {
     nextModal: false,
     checkModal: false,
     restFields: false,
+    photograph: false,
     registModal: false,
     repos: [0, 0, 0, 0, 0],
     userParam: { name: '', gender: '', phone: '' },
@@ -69,10 +70,14 @@ export default {
         userParam
       })
     },
-    * photograph({ userParam }, { call }) {
+    * photograph({ userParam }, { call, put }) {
       const response = yield call(api.photograph, { ...userParam })
       if (response.data.ok === 'ok') {
         message.info('拍照成功')
+        yield put({
+          type: 'savePhotograph',
+          photograph: true
+        })
       }
     },
     * saveUser({ _ }, { call, put, select }) {
@@ -84,6 +89,10 @@ export default {
           type: 'saveFields',
           restFields: true,
           params: { name: '', phone: '', gender: '', taste: '' },
+        })
+        yield put({
+          type: 'savePhotograph',
+          photograph: false
         })
       } else {
         message.warning('您已注册过，请不要重复注册')
@@ -396,6 +405,12 @@ export default {
         ...state,
         rcv: action.rcv,
         hints: action.hints,
+      }
+    },
+    savePhotograph(state, action) {
+      return {
+        ...state,
+        photograph: action.photograph,
       }
     },
     saveRcv(state, action) {

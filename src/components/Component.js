@@ -49,7 +49,7 @@ const SuccessModal = ({ nextModal, dispatch }) => {
         />
     </Modal>
 }
-const RegistModal = ({ dispatch, userParam, registModal,restFields }) => {
+const RegistModal = ({ dispatch, userParam, registModal, restFields, photograph }) => {
     return <Modal
         width={300}
         footer={null}
@@ -57,7 +57,7 @@ const RegistModal = ({ dispatch, userParam, registModal,restFields }) => {
         closable={false}
         visible={registModal}
     >
-        <Register userParam={userParam} dispatch={dispatch} restFields={restFields}/>
+        <Register userParam={userParam} dispatch={dispatch} restFields={restFields} photograph={photograph} />
     </Modal>
 }
 const CheckInfoModal = ({ checkModal, dispatch, params, checkInfo }) => {

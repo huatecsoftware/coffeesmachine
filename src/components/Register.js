@@ -12,11 +12,16 @@ class RegistrationForm extends React.Component {
 
     handleSubmit = e => {
         e.preventDefault()
+        const { photograph } = this.props
         this.props.form.validateFieldsAndScroll((err, values) => {
             if (!err) {
-                this.dispatch({
-                    type: 'Index/saveUser'
-                })
+                if (photograph) {
+                    this.dispatch({
+                        type: 'Index/saveUser'
+                    })
+                }else{
+                    message.warning('您还没有拍照')
+                }
             }
         })
     }
@@ -57,6 +62,7 @@ class RegistrationForm extends React.Component {
             })
         }
     }
+
 
     render() {
         const { userParam } = this.props

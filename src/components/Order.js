@@ -38,10 +38,10 @@ class Order extends React.Component {
 
 
     render() {
-        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal } = this.props.Index
+        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal,photograph } = this.props.Index
         return <div className={styles.main}>
             <Component.SuccessModal nextModal={nextModal} dispatch={this.dispatch} />
-            <Component.RegistModal dispatch={this.dispatch} userParam={userParam} restFields={restFields} registModal={registModal} />
+            <Component.RegistModal dispatch={this.dispatch} userParam={userParam} restFields={restFields} photograph={photograph} registModal={registModal} />
             <Component.CheckInfoModal checkModal={checkModal} dispatch={this.dispatch} params={params} checkInfo={this.checkInfo} />
             <Component.Header />
             <div className={`${styles.container} ${styles.flexRow}`}>
