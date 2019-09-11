@@ -25,8 +25,31 @@ class Order extends React.Component {
         } */
         //setInterval(queryRcv, 1000)
 
+        const canvas = document.getElementById('canvas')
+        const ctx = canvas.getContext('2d')
+
+        ctx.lineWidth = 1
+        ctx.strokeStyle = 'rgb(255, 255, 255)'
+
+        const draw = (data) => {
+            ctx.beginPath()
+            let x = 0
+            const pointWidth = canvas.width / data.length
+            for (let i = 0; i < data.length; i++) {
+                let y = data[i] * canvas.height / 2
+                if (i === 0) {
+                    ctx.moveTo(x, y)
+                } else {
+                    ctx.lineTo(x, y)
+                }
+                x += pointWidth
+            }
+            ctx.stroke()
+        }
+
         aiSocket.onmessage = (res) => {
             const data = JSON.parse(res.data)
+            draw(data.wave)
             this.props.dispatch({
                 type: 'Index/isNewUser',
                 person: data.person,
@@ -38,7 +61,7 @@ class Order extends React.Component {
 
 
     render() {
-        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal,photograph } = this.props.Index
+        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal, photograph } = this.props.Index
         return <div className={styles.main}>
             <Component.SuccessModal nextModal={nextModal} dispatch={this.dispatch} />
             <Component.RegistModal dispatch={this.dispatch} userParam={userParam} restFields={restFields} photograph={photograph} registModal={registModal} />
@@ -51,9 +74,10 @@ class Order extends React.Component {
                     <Component.ProgStep step={step} />
                 </div>
                 <div className={`${styles.right} ${styles.flexCol}`}>
-                    <Component.OrderShow lessCol={this.lessCol} lessOrder={lessOrder}/>
+                    <Component.OrderShow lessCol={this.lessCol} lessOrder={lessOrder} />
                 </div>
             </div>
+            <canvas id='canvas' className={styles.canvas}></canvas>
         </div>
     }
 }

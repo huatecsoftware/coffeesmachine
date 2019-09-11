@@ -305,6 +305,7 @@ th, td {
     border-right: 4px groove snow;
 }
 
+
 .right {
     background: url(../assets/note1.png);
     background-size: 100% 100%;
@@ -319,6 +320,16 @@ th, td {
     width: 33.33vw;
     height: 90vh;
 }
+.canvas{
+    width: 33.33vw;
+    height: 20vh;
+    background: black;
+    position: absolute;
+    left:66.66vw;
+    top:80vh;
+    z-index: 999;
+}
+
 
 .tasteName {
     font-size: 2vw;

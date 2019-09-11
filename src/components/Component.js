@@ -142,6 +142,7 @@ const FollowError = ({ hints }) => {
         })}
     </div>
 }
+
 const OrderShow = ({ lessCol, lessOrder }) => {
     return <Table
         columns={lessCol}
