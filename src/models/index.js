@@ -8,6 +8,7 @@ export default {
 
   state: {
     step: 0,
+    wave: [],
     error: '',
     hints: [],
     range: [],
@@ -42,7 +43,11 @@ export default {
     *faceRecognition({ _ }, { call }) {
       yield call(api.faceRecognition)
     },
-    *isNewUser({ person }, { put }) {
+    *isNewUser({ person, wave }, { put }) {
+      yield put({
+        type: 'saveWave',
+        wave
+      })
       if (person === 'unknown') {
         yield put({
           type: 'saveRegistModal',
@@ -452,6 +457,12 @@ export default {
       return {
         ...state,
         registModal: action.visible,
+      }
+    },
+    saveWave(state, action) {
+      return {
+        ...state,
+        wave: action.wave,
       }
     },
     saveSeries(state, action) {

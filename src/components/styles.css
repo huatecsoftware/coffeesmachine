@@ -323,7 +323,7 @@ th, td {
 .canvas{
     width: 33.33vw;
     height: 20vh;
-    background: black;
+    background: snow;
     position: absolute;
     left:66.66vw;
     top:80vh;
