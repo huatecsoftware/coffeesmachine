@@ -224,6 +224,8 @@ def cameraProcess():
                 os.remove(BASE_DIR+'/known.txt')
             if os.path.exists(BASE_DIR+'/personNum.txt'):
                 os.remove(BASE_DIR+'/personNum.txt')
+            if os.path.exists(BASE_DIR+'/welcome.txt'):
+                os.remove(BASE_DIR+'/welcome.txt')
             with open(BASE_DIR+'/recordP.txt', 'r') as f:
                 pid = f.readline()
                 f.close()
@@ -269,11 +271,13 @@ def recordProcess():
         large_sample_count = np.sum(audio_data > 1500)
         # 大于1500的有20个以上时，保存这段录音，时长5秒
         if large_sample_count > 20:
+            start = time.time()
             save_count = 5
         else:
             save_count -= 1
 
         if save_count < 0:
+            end = time.time()
             save_count = 0
 
         if save_count > 0:
@@ -401,6 +405,9 @@ def STT(audioContent):
                     # 判断是否认识这个人，如果认识则默认为唤醒状态
                     if name == 'known':
                         AIStatus = 'wake'
+                        if os.path.exists(BASE_DIR + "/welcome.txt"):
+                            isCancle = False
+                            os.remove(BASE_DIR + "/welcome.txt")
                     else:
                         # 如果不认识，首先判断镜头中是否有人，如果没人则忽略周围声音，如果有人，则回复不认识的语音
                         with open(BASE_DIR + "/personNum.txt", "r") as f:
@@ -409,6 +416,8 @@ def STT(audioContent):
                             os.remove(BASE_DIR + "/personNum.txt")
                             if persons != 0:
                                 play(BASE_DIR+'/wav/const/不认识.wav')
+                            else:
+                                AIStatus = 'sleep'
                     # 如果是唤醒状态，并且认识这个人，这个人也没有说取消订单字样，则进行后续逻辑
                     # 如果有听到取消订单则状态改为sleep，是否取消改为True
                     if AIStatus == 'wake' and name == 'known' and not isCancle:
