@@ -107,7 +107,7 @@ async def AI(websocket, path):
                             TTS('%s%s您好，欢迎光临，要来杯咖啡么' %
                                 (person[:-4], gender), BASE_DIR + "/wav/known/%s.wav" % person)
                         with open(BASE_DIR +"/welcome.txt", "w") as f:
-                            f.write('welcome')
+                            f.write(str(time.time()))
                     else:
                         if onlyOnce:
                             onlyOnce = False

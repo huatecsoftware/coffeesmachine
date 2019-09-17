@@ -20,10 +20,12 @@ from aliyunsdkcore.request import CommonRequest
 BASE_DIR = BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 
+deltaTime = 0
 onlyOne = True
 lastPerson = ''
 isCancle = False
 AIStatus = 'sleep'
+recordStatus = True
 voices = ['Xiaoyun', 'Xiaomeng', 'Ruoxi', 'Siqi', 'Sijia', 'Aiqi', 'Aijia', 'Ninger', 'Ruilin', 'Amei', 'Xiaoxue',
           'Siyue', 'Aixia', 'Aimei', 'Aiyu', 'Aiyue', 'Aijing', 'Xiaomei', 'Yina', 'Sijing', 'Sitong', 'Xiaobei', 'Aibao']
 
@@ -253,6 +255,7 @@ def recordProcess():
     """  
     录音进程
     """
+    global recordStatus, deltaTime
     save_count = 0
     save_buffer = []
     # pyaudio对象，用来处理录音的音频流
@@ -271,14 +274,23 @@ def recordProcess():
         large_sample_count = np.sum(audio_data > 1500)
         # 大于1500的有20个以上时，保存这段录音，时长5秒
         if large_sample_count > 20:
-            start = time.time()
+            if recordStatus:
+                recordStatus = False
+                start = time.time()
             save_count = 5
         else:
             save_count -= 1
 
         if save_count < 0:
-            end = time.time()
+            if not recordStatus:
+                recordStatus = True
+                end = time.time()
             save_count = 0
+
+        try:
+            deltaTime = np.abs(start-end)
+        except:
+            pass
 
         if save_count > 0:
             save_buffer.append(string_audio_data)
@@ -371,7 +383,7 @@ def STT(audioContent):
     阿里语音识别接口
     audioContent:音频字节流
     """
-    global AIStatus, isCancle
+    global AIStatus, isCancle, deltaTime
     host = 'nls-gateway.cn-shanghai.aliyuncs.com'
     httpHeaders = {
         'X-NLS-Token': getToken('LTAI4ycWN34khiO2', 'TazGS3zeb5eeBc2ZEmBUGuCAVo1t9e'),
@@ -407,7 +419,16 @@ def STT(audioContent):
                         AIStatus = 'wake'
                         if os.path.exists(BASE_DIR + "/welcome.txt"):
                             isCancle = False
-                            os.remove(BASE_DIR + "/welcome.txt")
+                            with open(BASE_DIR + "/welcome.txt", "r") as f:
+                                welTime = f.readline()
+                                # 问候语过后5秒内没有回复则进入睡眠状态
+                                if time.time()-float(welTime) > 5:
+                                    AIStatus = 'sleep'
+                                f.close()
+                                os.remove(BASE_DIR + "/welcome.txt")
+                        # 超过5秒没人说话则进入睡眠状态
+                        if deltaTime > 5:
+                            AIStatus = 'sleep'
                     else:
                         # 如果不认识，首先判断镜头中是否有人，如果没人则忽略周围声音，如果有人，则回复不认识的语音
                         with open(BASE_DIR + "/personNum.txt", "r") as f:
