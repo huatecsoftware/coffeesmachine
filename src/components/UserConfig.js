@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './styles.css'
 import * as utils from '../utils/utils'
-import { Form, Input, Button, Radio, message, Row } from 'antd'
+import { Form, Input, Button, Radio, message, Row, Switch } from 'antd'
 
 const RadioGroup = Radio.Group
 
@@ -26,9 +26,10 @@ class UserConfig extends React.Component {
         }
     }
 
-    faceRecognition = () => {
+    switchChange = (checked) => {
         this.dispatch({
-            type: 'Index/faceRecognition'
+            type: 'Index/faceRecognition',
+            checked
         })
     }
 
@@ -68,8 +69,8 @@ class UserConfig extends React.Component {
                 </Form.Item>
                 <Form.Item wrapperCol={{ sm: { span: 16, offset: 2 } }}>
                     <Row type='flex' justify='space-between' align='middle' style={{ width: '20vw' }}>
-                        <Button type='primary' onClick={() => this.faceRecognition()}>智能模式</Button>
                         <Button type='primary' htmlType='submit'>确定下单</Button>
+                        <Switch checkedChildren='智能模式/ON' unCheckedChildren='智能模式/OFF' onChange={checked=>this.switchChange(checked)} defaultChecked={false} />
                     </Row>
                 </Form.Item>
             </Row>

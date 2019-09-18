@@ -18,7 +18,6 @@ export default {
     orderIng: [],
     orderFin: [],
     lessOrder: [],
-    clicked: false,
     splineData: [],
     equipments: [],
     nextModal: false,
@@ -41,12 +40,8 @@ export default {
         e
       })
     },
-    *faceRecognition({ _ }, { call, put }) {
-      yield call(api.faceRecognition)
-      /* yield put({
-        type: 'saveClicked',
-        clicked: true
-      }) */
+    *faceRecognition({ checked }, { call }) {
+      yield call(api.faceRecognition, { checked })
     },
     *isNewUser({ person, wave }, { put }) {
       yield put({
@@ -487,12 +482,6 @@ export default {
       return {
         ...state,
         step: action.step,
-      }
-    },
-    saveClicked(state, action) {
-      return {
-        ...state,
-        clicked: action.clicked,
       }
     },
     saveUserParam(state, action) {
