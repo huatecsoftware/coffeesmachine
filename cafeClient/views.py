@@ -123,20 +123,25 @@ def failOrder(request):
         pass
     return JsonResponse({'ok': 'ok'})
 
+proid=''
 
 @csrf_exempt
 def faceRecognition(request):
     """  
         智能模式开启语音和视频进程
     """
-    recordP = Process(target=recordProcess)
-    recordP.start()
-    cameraP = Process(target=cameraProcess)
-    cameraP.start()
-    with open(BASE_DIR + "/recordP.txt", "w") as f:
-        f.write(str(recordP.pid))
-    with open(BASE_DIR + "/cameraP.txt", "w") as f:
-        f.write(str(cameraP.pid))
+    global proid
+    switch = json.loads(request.body)['checked']
+    if switch:
+        recordP = Process(target=recordProcess)
+        recordP.start()
+        proid=str(recordP.pid)
+    else:
+        cmd = 'taskkill /pid ' + str(proid) + ' /f'
+        try:
+            os.system(cmd)
+        except Exception as e:
+            print(e)
     return JsonResponse({'ok': 'ok'})
 
 

@@ -228,24 +228,6 @@ def cameraProcess():
                 os.remove(BASE_DIR+'/personNum.txt')
             if os.path.exists(BASE_DIR+'/welcome.txt'):
                 os.remove(BASE_DIR+'/welcome.txt')
-            with open(BASE_DIR+'/recordP.txt', 'r') as f:
-                pid = f.readline()
-                f.close()
-                os.remove(BASE_DIR+'/recordP.txt')
-                cmd = 'taskkill /pid ' + str(pid) + ' /f'
-                try:
-                    os.system(cmd)
-                except Exception as e:
-                    print(e)
-            with open(BASE_DIR+'/cameraP.txt', 'r') as f:
-                pid = f.readline()
-                f.close()
-                os.remove(BASE_DIR+'/cameraP.txt')
-                cmd = 'taskkill /pid ' + str(pid) + ' /f'
-                try:
-                    os.system(cmd)
-                except Exception as e:
-                    print(e)
             break
     video_capture.release()
     cv2.destroyAllWindows()
@@ -422,7 +404,7 @@ def STT(audioContent):
                             with open(BASE_DIR + "/welcome.txt", "r") as f:
                                 welTime = f.readline()
                                 # 问候语过后5秒内没有回复则进入睡眠状态
-                                if time.time()-float(welTime) > 5:
+                                if time.time()-float(welTime) > 8:
                                     AIStatus = 'sleep'
                                 f.close()
                                 os.remove(BASE_DIR + "/welcome.txt")

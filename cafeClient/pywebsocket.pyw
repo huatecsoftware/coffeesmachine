@@ -115,9 +115,8 @@ async def AI(websocket, path):
             else:
                 onlyOnce = True
             try:
-                if os.path.exists(BASE_DIR + "/wave.txt"):
-                    wave = np.loadtxt(BASE_DIR+'/wave.txt').tolist()
-                    lastWave = wave
+                wave = np.loadtxt(BASE_DIR+'/wave.txt').tolist()
+                lastWave = wave
             except:
                 wave = lastWave
             await websocket.send(json.dumps({'person': person, 'wave': wave}))
