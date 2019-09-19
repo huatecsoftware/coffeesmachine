@@ -40,7 +40,7 @@ class Order extends React.Component {
 
 
     render() {
-        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal, photograph, clicked } = this.props.Index
+        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal, photograph, checked } = this.props.Index
         return <div className={styles.main}>
             <Component.SuccessModal nextModal={nextModal} dispatch={this.dispatch} />
             <Component.RegistModal dispatch={this.dispatch} userParam={userParam} restFields={restFields} photograph={photograph} registModal={registModal} />
@@ -49,12 +49,12 @@ class Order extends React.Component {
             <div className={`${styles.container} ${styles.flexRow}`}>
                 <div className={`${styles.left} ${styles.flexCol}`}>
                     <Component.CafeType params={params} dispatch={this.dispatch} />
-                    <UserConfig dispatch={this.dispatch} params={params} restFields={restFields} clicked={clicked} />
+                    <UserConfig dispatch={this.dispatch} params={params} restFields={restFields} checked={checked}/>
                     <Component.ProgStep step={step} />
                 </div>
                 <div className={`${styles.right} ${styles.flexCol}`}>
                     <Component.OrderShow lessCol={this.lessCol} lessOrder={lessOrder} />
-                    <VoicePlot clicked={clicked} />
+                    <VoicePlot checked={checked}/>
                 </div>
             </div>
         </div>

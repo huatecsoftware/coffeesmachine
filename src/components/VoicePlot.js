@@ -41,7 +41,8 @@ class VoicePlot extends React.Component {
 
 
     render() {
-        return <canvas id='canvas' className={styles.canvas}></canvas>
+        const { checked } = this.props
+        return <canvas style={{ display: checked ? "block" : "none" }} id='canvas' className={styles.canvas}></canvas>
     }
 }
 export default connect(({ Index }) => ({

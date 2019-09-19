@@ -28,7 +28,7 @@ class UserConfig extends React.Component {
 
     switchChange = (checked) => {
         this.dispatch({
-            type: 'Index/faceRecognition',
+            type: 'Index/intelligenceModel',
             checked
         })
     }
@@ -46,6 +46,7 @@ class UserConfig extends React.Component {
         }
     }
     render() {
+        const { checked } = this.props
         const { getFieldDecorator } = this.props.form
         return <Form onSubmit={this.handleSubmit} className={`${styles.myForm} ${styles.flexCol}`} labelCol={{ xs: { span: 24 }, sm: { span: 8 } }} wrapperCol={{ xs: { span: 24 }, sm: { span: 16 } }}>
             <Row type='flex' style={{ width: '50vw' }}>
@@ -70,7 +71,7 @@ class UserConfig extends React.Component {
                 <Form.Item wrapperCol={{ sm: { span: 16, offset: 2 } }}>
                     <Row type='flex' justify='space-between' align='middle' style={{ width: '20vw' }}>
                         <Button type='primary' htmlType='submit'>确定下单</Button>
-                        <Switch checkedChildren='智能模式/ON' unCheckedChildren='智能模式/OFF' onChange={checked=>this.switchChange(checked)} defaultChecked={false} />
+                        <Switch checkedChildren='智能模式/ON' unCheckedChildren='智能模式/OFF' onChange={checked => this.switchChange(checked)} checked={checked} />
                     </Row>
                 </Form.Item>
             </Row>

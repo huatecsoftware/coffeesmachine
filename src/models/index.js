@@ -20,6 +20,7 @@ export default {
     lessOrder: [],
     splineData: [],
     equipments: [],
+    checked: false,
     nextModal: false,
     checkModal: false,
     restFields: false,
@@ -40,8 +41,12 @@ export default {
         e
       })
     },
-    *faceRecognition({ checked }, { call }) {
-      yield call(api.faceRecognition, { checked })
+    *intelligenceModel({ checked }, { call, put }) {
+      yield call(api.intelligenceModel, { checked })
+      yield put({
+        type: 'saveSwitch',
+        checked
+      })
     },
     *isNewUser({ person, wave }, { put }) {
       yield put({
@@ -63,8 +68,9 @@ export default {
     * closeRegistModal({ _ }, { call, put }) {
       yield call(api.deleteTempFile)
       yield put({
-        type: 'saveRegistModal',
-        visible: false
+        type: 'saveFields',
+        restFields: true,
+        params: { name: '', phone: '', gender: '', taste: '' },
       })
     },
     * recordUserParam({ key, val }, { put, select }) {
@@ -89,7 +95,6 @@ export default {
       const userParam = yield select(state => state.Index.userParam)
       const response = yield call(api.addUser, { userParam })
       if (response.data.ok === 'ok') {
-        message.success('注册成功')
         yield put({
           type: 'saveFields',
           restFields: true,
@@ -488,6 +493,12 @@ export default {
       return {
         ...state,
         userParam: action.userParam
+      }
+    },
+    saveSwitch(state, action) {
+      return {
+        ...state,
+        checked: action.checked
       }
     },
     saveOrderState(state, action) {

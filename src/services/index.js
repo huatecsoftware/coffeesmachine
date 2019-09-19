@@ -21,8 +21,8 @@ export function PLCOFF(param) {
 export function searchOrderByVal(param) {
   return requestPOST(`http://${host}:${port}/searchOrder/`, param)
 }
-export function faceRecognition(param) {
-  return requestPOST(`http://${host}:${port}/faceRecognition/`, param)
+export function intelligenceModel(param) {
+  return requestPOST(`http://${host}:${port}/intelligenceModel/`, param)
 }
 export function loopDB(param) {
   return requestPOST(`http://${host}:${port}/loopDB/`, param)
