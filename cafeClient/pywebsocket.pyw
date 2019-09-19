@@ -103,6 +103,9 @@ async def AI(websocket, path):
                                 cmd = 'taskkill /pid ' + pid + ' /f'
                                 try:
                                     os.system(cmd)
+                                    await asyncio.sleep(5)
+                                    with open(BASE_DIR +"/waitListen.txt", "w") as f:
+                                        f.write('waitListen')
                                 except Exception as e:
                                     print(e)
                     else:

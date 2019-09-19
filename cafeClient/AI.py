@@ -21,8 +21,10 @@ BASE_DIR = BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 
 onlyOne = True
-cameraOpen = False
+noListen = True
 AIStatus = 'sleep'
+cameraOpen = False
+wakeTime = time.time()
 checkStartSTatus = False
 checkStartTime = time.time()
 voices = ['Xiaoyun', 'Xiaomeng', 'Ruoxi', 'Siqi', 'Sijia', 'Aiqi', 'Aijia', 'Ninger', 'Ruilin', 'Amei', 'Xiaoxue',
@@ -207,7 +209,7 @@ def recordProcess():
     """  
     录音进程
     """
-    global checkStartTime, checkStartSTatus, AIStatus, cameraOpen
+    global checkStartTime, checkStartSTatus, AIStatus, cameraOpen, wakeTime, noListen
     save_count = 0
     save_buffer = []
     # pyaudio对象，用来处理录音的音频流
@@ -219,10 +221,22 @@ def recordProcess():
     while True:
         if checkStartSTatus:
             if int(time.time()-checkStartTime) == 5:
+                play(BASE_DIR+'/wav/const/等待制作.wav')
                 checkStartSTatus = False
                 AIStatus = 'sleep'
                 cameraOpen = False
-                play(BASE_DIR+'/wav/const/等待制作.wav')
+                noListen = True
+        if AIStatus == 'wake':
+            if int(time.time()-wakeTime) == 5 and noListen:
+                play(BASE_DIR + "/wav/const/等待回复.wav")
+                AIStatus = 'sleep'
+                cameraOpen = False
+        if os.path.exists(BASE_DIR + "/waitListen.txt"):
+            os.remove(BASE_DIR + "/waitListen.txt")
+            if not checkStartSTatus:
+                play(BASE_DIR + "/wav/const/等待回复.wav")
+                AIStatus = 'sleep'
+                cameraOpen = False
         # 每次读取1500字节缓冲
         string_audio_data = stream.read(1500)
         # 将缓冲数据转换为ndarray
@@ -284,7 +298,7 @@ def STT(audioContent):
     阿里语音识别接口
     audioContent:音频字节流
     """
-    global AIStatus, cameraOpen, checkStartTime, checkStartSTatus
+    global AIStatus, cameraOpen, checkStartTime, checkStartSTatus, wakeTime, noListen
     host = 'nls-gateway.cn-shanghai.aliyuncs.com'
     httpHeaders = {
         'X-NLS-Token': getToken('LTAI4ycWN34khiO2', 'TazGS3zeb5eeBc2ZEmBUGuCAVo1t9e'),
@@ -307,6 +321,7 @@ def STT(audioContent):
             if ('花' in result) or ('华' in result):
                 AIStatus = 'wake'
                 play(BASE_DIR+'/wav/const/唤醒.wav')
+                wakeTime = time.time()
             if os.path.exists(BASE_DIR + "/giveUp.txt"):
                 os.remove(BASE_DIR + "/giveUp.txt")
                 AIStatus = 'sleep'
@@ -314,6 +329,7 @@ def STT(audioContent):
             if AIStatus == 'wake':
                 if ('消订' in result) or ('取消' in result) or ('交订' in result) or ('订单' in result):
                     play(BASE_DIR+'/wav/const/取消订单.wav')
+                    noListen = True
                     AIStatus = 'sleep'
                     cameraOpen = False
                     checkStartSTatus = False
@@ -321,11 +337,14 @@ def STT(audioContent):
                     play(BASE_DIR+'/wav/const/清咖啡.wav')
                     checkStartTime = time.time()
                     checkStartSTatus = True
+                    noListen = False
                 elif (('农卡' in result) or ('浓卡' in result) or ('浓咖' in result) or ('农咖' in result)) and cameraOpen and not checkStartSTatus:
                     play(BASE_DIR+'/wav/const/浓咖啡.wav')
                     checkStartTime = time.time()
                     checkStartSTatus = True
+                    noListen = False
                 elif ('咖' in result or '啡' in result) and not cameraOpen and not checkStartSTatus:
+                    noListen = False
                     cameraOpen = True
                     cameraP = Process(target=cameraProcess)
                     cameraP.start()
@@ -334,65 +353,82 @@ def STT(audioContent):
                         f.write(str(cameraP.pid))
                 elif ('咖' in result or '啡' in result) and cameraOpen and not checkStartSTatus:
                     play(BASE_DIR+'/wav/const/没听清.wav')
+                    noListen = False
                 elif '没有' in result and not checkStartSTatus:
                     play(BASE_DIR+'/wav/const/讨厌.wav')
+                    noListen = False
                 elif '傻' in result and not checkStartSTatus:
                     play(BASE_DIR+'/wav/const/傻.wav')
+                    noListen = False
                 elif '瞅' in result and not checkStartSTatus:
                     play(BASE_DIR+'/wav/const/瞅你.wav')
+                    noListen = False
                 elif '好听' in result and not checkStartSTatus:
                     play(BASE_DIR+'/wav/const/开心.wav')
+                    noListen = False
                 elif '加' in result and '等' in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('加')]
                     right = result[result.index(
                         '加')+1:result.index('等')]
                     operater(left, right, '加')
                 elif '加' in result and '等' not in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('加')]
                     right = result[result.index('加')+1:]
                     operater(left, right, '加')
                 elif '减' in result and '等' in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('减')]
                     right = result[result.index(
                         '减')+1:result.index('等')]
                     operater(left, right, '减')
                 elif '减' in result and '等' not in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('减')]
                     right = result[result.index('减')+1:]
                     operater(left, right, '减')
                 elif '乘以' in result and '等' in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('乘以')]
                     right = result[result.index(
                         '乘以')+2:result.index('等')]
                     operater(left, right, '乘')
                 elif '乘以' in result and '等' not in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('乘以')]
                     right = result[result.index('乘以')+2:]
                     operater(left, right, '乘')
                 elif '乘' in result and '等' in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('乘')]
                     right = result[result.index(
                         '乘')+1:result.index('等')]
                     operater(left, right, '乘')
                 elif '乘' in result and '等' not in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('乘')]
                     right = result[result.index('乘')+1:]
                     operater(left, right, '乘')
                 elif '除以' in result and '等' in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('除以')]
                     right = result[result.index(
                         '除以')+2:result.index('等')]
                     operater(left, right, '除')
                 elif '除以' in result and '等' not in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('除以')]
                     right = result[result.index('除以')+2:]
                     operater(left, right, '除')
                 elif '除' in result and '等' in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('除')]
                     right = result[result.index(
                         '除')+1:result.index('等')]
                     operater(left, right, '除')
                 elif '除' in result and '等' not in result and not checkStartSTatus:
+                    noListen = False
                     left = result[:result.index('除')]
                     right = result[result.index('除')+1:]
                     operater(left, right, '除')
@@ -403,3 +439,14 @@ def STT(audioContent):
     except ValueError:
         print('The response is not json format string')
     conn.close()
+
+
+class TTSThread (threading.Thread):
+    def __init__(self, text, path):
+        threading.Thread.__init__(self)
+        self.text = text
+        self.path = path
+
+    def run(self):
+        TTS(self.text,self.path)
+

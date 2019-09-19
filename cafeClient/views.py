@@ -200,8 +200,8 @@ def addUser(request):
         param['userParam']['name'], param['userParam']['phone'])
     user.save()
     os.remove(BASE_DIR + "/name.txt")
-    TTS('%s%s您好，欢迎光临，请问您要哪种咖啡呢?' %
-        (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:]))
+    TTSThread('%s%s您好，欢迎光临，请问您要哪种咖啡呢?' %
+        (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:])).start()
     """     res = 'ok'
     else:
         res = 'err' """
