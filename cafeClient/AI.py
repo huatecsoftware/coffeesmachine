@@ -20,12 +20,11 @@ from aliyunsdkcore.request import CommonRequest
 BASE_DIR = BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 
-deltaTime = 0
 onlyOne = True
-lastPerson = ''
-isCancle = False
+cameraOpen = False
 AIStatus = 'sleep'
-recordStatus = True
+checkStartSTatus = False
+checkStartTime = time.time()
 voices = ['Xiaoyun', 'Xiaomeng', 'Ruoxi', 'Siqi', 'Sijia', 'Aiqi', 'Aijia', 'Ninger', 'Ruilin', 'Amei', 'Xiaoxue',
           'Siyue', 'Aixia', 'Aimei', 'Aiyu', 'Aiyue', 'Aijing', 'Xiaomei', 'Yina', 'Sijing', 'Sitong', 'Xiaobei', 'Aibao']
 
@@ -115,7 +114,7 @@ def cameraProcess():
     """
     人脸识别的进程函数
     """
-    global onlyOne, lastPerson
+    global onlyOne
     face_locations = []
     face_encodings = []
     process_this_frame = True
@@ -126,16 +125,9 @@ def cameraProcess():
     width = video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
     height = video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
     while True:
-        # 前端注册完成信号，重新计算人脸特征值
-        if os.path.exists(BASE_DIR + "/register.txt"):
-            os.remove(BASE_DIR + "/register.txt")
-            knowFace = loadKnowFace()
         # ret摄像头设否开启，False关闭 True开启
         # frame每帧视频数据，ndarray格式
         ret, frame = video_capture.read()
-        # 黄线包裹区域
-        cv2.rectangle(frame, (int(width*0.25), 0),
-                      (int(width*0.75), int(height)), (0, 255, 255))
         # 键盘点击监听
         key = cv2.waitKey(1)
         # 重置视频帧大小，提高处理效率？
@@ -154,11 +146,9 @@ def cameraProcess():
                 img.save(BASE_DIR+'/faces/%s.jpg' % pic)
         # 逐帧处理
         if process_this_frame:
-            # 检测当前帧中是否存在人脸，将人脸数写入personNum.txt文件，语音识别时需要用到
+            # 检测当前帧中是否存在人脸
             face_locations = face_recognition.face_locations(
                 rgb_small_frame)
-            with open(BASE_DIR + "/personNum.txt", "w") as f:
-                f.write(str(len(face_locations)))
             # 根据人脸数计算每张脸的特征值
             face_encodings = face_recognition.face_encodings(
                 rgb_small_frame, face_locations)
@@ -177,25 +167,14 @@ def cameraProcess():
                 if matches[best_match_index]:
                     name = list(knowFace.keys())[
                         best_match_index]
-                    # lastPerson默认是空，当认识一个人时把lastPerson赋值为认识的这个人，当俩次认识的不是一个人时，重启问候语音
-                    if lastPerson != name:
-                        onlyOne = True
-                    lastPerson = name
-                    # 生成一个文件known.txt文件，内容为known，代表认识这个人
-                    with open(BASE_DIR + "/known.txt", "w") as f:
-                        f.write('known')
-                    # 当认识的这个人在黄线区域内时开启问候语音，将姓名写入name.txt文件，供问候语音使用
-                    if len(face_locations) > 0 and face_locations[0][1]*4 < int(width*0.75) and face_locations[0][3]*4 > int(width*0.25) and onlyOne:
+                    if onlyOne:
                         onlyOne = False
                         with open(BASE_DIR+'/name.txt', 'w') as f:
                             f.write(name)
                             f.close()
                     face_names.append(name[:-4])
                 else:
-                    # 不认识与认识的处理逻辑相反
-                    with open(BASE_DIR + "/known.txt", "w") as f:
-                        f.write('unknown')
-                    if len(face_locations) > 0 and face_locations[0][1]*4 < int(width*0.75) and face_locations[0][3]*4 > int(width*0.25) and onlyOne:
+                    if onlyOne:
                         onlyOne = False
                         with open(BASE_DIR+'/name.txt', 'w') as f:
                             f.write('unknown')
@@ -218,16 +197,7 @@ def cameraProcess():
             cv2.rectangle(frame, (left, top),
                           (right, bottom), (255, 255, 255), 2)
         cv2.imshow('FaceRecognition', frame)
-        # 键盘摁下q键，关闭进程，删除临时文件，关闭摄像头和窗口
         if key == ord('q'):
-            if os.path.exists(BASE_DIR+'/name.txt'):
-                os.remove(BASE_DIR+'/name.txt')
-            if os.path.exists(BASE_DIR+'/known.txt'):
-                os.remove(BASE_DIR+'/known.txt')
-            if os.path.exists(BASE_DIR+'/personNum.txt'):
-                os.remove(BASE_DIR+'/personNum.txt')
-            if os.path.exists(BASE_DIR+'/welcome.txt'):
-                os.remove(BASE_DIR+'/welcome.txt')
             break
     video_capture.release()
     cv2.destroyAllWindows()
@@ -237,7 +207,7 @@ def recordProcess():
     """  
     录音进程
     """
-    global recordStatus, deltaTime
+    global checkStartTime, checkStartSTatus, AIStatus, cameraOpen
     save_count = 0
     save_buffer = []
     # pyaudio对象，用来处理录音的音频流
@@ -247,6 +217,12 @@ def recordProcess():
                      frames_per_buffer=1500)
     print('开始录音')
     while True:
+        if checkStartSTatus:
+            if int(time.time()-checkStartTime) == 5:
+                checkStartSTatus = False
+                AIStatus = 'sleep'
+                cameraOpen = False
+                play(BASE_DIR+'/wav/const/等待制作.wav')
         # 每次读取1500字节缓冲
         string_audio_data = stream.read(1500)
         # 将缓冲数据转换为ndarray
@@ -256,23 +232,12 @@ def recordProcess():
         large_sample_count = np.sum(audio_data > 1500)
         # 大于1500的有20个以上时，保存这段录音，时长5秒
         if large_sample_count > 20:
-            if recordStatus:
-                recordStatus = False
-                start = time.time()
             save_count = 5
         else:
             save_count -= 1
 
         if save_count < 0:
-            if not recordStatus:
-                recordStatus = True
-                end = time.time()
             save_count = 0
-
-        try:
-            deltaTime = np.abs(start-end)
-        except:
-            pass
 
         if save_count > 0:
             save_buffer.append(string_audio_data)
@@ -282,55 +247,9 @@ def recordProcess():
                 content = b''
                 for buf in save_buffer:
                     content = content + buf
-                STT(content)
+                if not os.path.exists(BASE_DIR + "/cameraP.txt") and len(content) > 21000 and len(content) < 70000:
+                    STT(content)
                 save_buffer = []
-
-
-def getGender(path):
-    """  
-    人脸信息识别，此处主要识别性别
-    path:人脸图片路径
-    """
-    boundary = '----------%s' % hex(int(time.time() * 1000))
-    data = []
-    data.append('--%s' % boundary)
-    data.append('Content-Disposition: form-data; name="%s"\r\n' %
-                'api_key')
-    data.append('_J5zX52Zc7kmvxjz3WWEgG6QHLXWJF-K')
-    data.append('--%s' % boundary)
-    data.append('Content-Disposition: form-data; name="%s"\r\n' %
-                'api_secret')
-    data.append('Z5XX_2af1a7pTBLGeBxBMORJlsK1jC8r')
-    data.append('--%s' % boundary)
-    fr = open(path, 'rb')
-    data.append('Content-Disposition: form-data; name="%s"; filename=" "' %
-                'image_file')
-    data.append('Content-Type: %s\r\n' % 'application/octet-stream')
-    data.append(fr.read())
-    fr.close()
-    data.append('--%s' % boundary)
-    data.append('Content-Disposition: form-data; name="%s"\r\n' %
-                'return_landmark')
-    data.append('1')
-    data.append('--%s' % boundary)
-    data.append('Content-Disposition: form-data; name="%s"\r\n' %
-                'return_attributes')
-    data.append(
-        'gender,age,smiling,headpose,facequality,blur,eyestatus,emotion,ethnicity,beauty,mouthstatus,eyegaze,skinstatus')
-    data.append('--%s--\r\n' % boundary)
-
-    for i, d in enumerate(data):
-        if isinstance(d, str):
-            data[i] = d.encode('utf-8')
-    http_body = b'\r\n'.join(data)
-    req = urllib.request.Request(
-        url='https://api-cn.faceplusplus.com/facepp/v3/detect', data=http_body)
-    req.add_header(
-        'Content-Type', 'multipart/form-data; boundary=%s' % boundary)
-    resp = urllib.request.urlopen(req, timeout=5)
-    qrcont = resp.read()
-    res = json.loads(qrcont.decode('utf-8'))
-    return res
 
 
 def TTS(text, filename):
@@ -347,7 +266,7 @@ def TTS(text, filename):
     host = 'nls-gateway.cn-shanghai.aliyuncs.com'
     conn = http.client.HTTPSConnection(host)
     conn.request(method='GET', url='https://nls-gateway.cn-shanghai.aliyuncs.com/stream/v1/tts?appkey=F5KOFmsQkJYT5bfB&token=%s&text=%s&format=wav&sample_rate=16000&voice=%s' %
-                 (getToken('LTAI4ycWN34khiO2', 'TazGS3zeb5eeBc2ZEmBUGuCAVo1t9e'), textUrlencode, random.choice(voices)))
+                 (getToken('LTAI4ycWN34khiO2', 'TazGS3zeb5eeBc2ZEmBUGuCAVo1t9e'), textUrlencode, voices[-1]))
     response = conn.getresponse()
     contentType = response.getheader('Content-Type')
     body = response.read()
@@ -365,7 +284,7 @@ def STT(audioContent):
     阿里语音识别接口
     audioContent:音频字节流
     """
-    global AIStatus, isCancle, deltaTime
+    global AIStatus, cameraOpen, checkStartTime, checkStartSTatus
     host = 'nls-gateway.cn-shanghai.aliyuncs.com'
     httpHeaders = {
         'X-NLS-Token': getToken('LTAI4ycWN34khiO2', 'TazGS3zeb5eeBc2ZEmBUGuCAVo1t9e'),
@@ -384,138 +303,103 @@ def STT(audioContent):
             result = body['result']
             # 识别成功后续逻辑
             print('Recognize result: ' + result)
-            arr1, arr2 = ['清', '青', '轻', '请', '冰', '新',
-                          '情', '听', '停', '金', '京', '经'], ['农', '浓', '本', '能', '檬', '侬']
             # 热词唤醒，唤醒后状态改为wake，是否取消改为False
             if ('花' in result) or ('华' in result):
                 AIStatus = 'wake'
-                isCancle = False
                 play(BASE_DIR+'/wav/const/唤醒.wav')
-            if os.path.exists(BASE_DIR+'/known.txt'):
-                with open(BASE_DIR+'/known.txt', 'r') as f:
-                    name = f.readline()
-                    f.close()
-                    os.remove(BASE_DIR+'/known.txt')
-                    # 判断是否认识这个人，如果认识则默认为唤醒状态
-                    if name == 'known':
-                        AIStatus = 'wake'
-                        if os.path.exists(BASE_DIR + "/welcome.txt"):
-                            isCancle = False
-                            with open(BASE_DIR + "/welcome.txt", "r") as f:
-                                welTime = f.readline()
-                                # 问候语过后5秒内没有回复则进入睡眠状态
-                                if time.time()-float(welTime) > 8:
-                                    AIStatus = 'sleep'
-                                f.close()
-                                os.remove(BASE_DIR + "/welcome.txt")
-                        # 超过5秒没人说话则进入睡眠状态
-                        if deltaTime > 5:
-                            AIStatus = 'sleep'
-                    else:
-                        # 如果不认识，首先判断镜头中是否有人，如果没人则忽略周围声音，如果有人，则回复不认识的语音
-                        with open(BASE_DIR + "/personNum.txt", "r") as f:
-                            persons = int(f.readline())
-                            f.close()
-                            os.remove(BASE_DIR + "/personNum.txt")
-                            if persons != 0:
-                                play(BASE_DIR+'/wav/const/不认识.wav')
-                            else:
-                                AIStatus = 'sleep'
-                    # 如果是唤醒状态，并且认识这个人，这个人也没有说取消订单字样，则进行后续逻辑
-                    # 如果有听到取消订单则状态改为sleep，是否取消改为True
-                    if AIStatus == 'wake' and name == 'known' and not isCancle:
-                        if ('消订' in result) or ('取消' in result) or ('交订' in result) or ('订单' in result):
-                            play(BASE_DIR+'/wav/const/取消订单.wav')
-                            AIStatus = 'sleep'
-                            isCancle = True
-                        elif ('咖' in result and result[result.index('咖')-1] in arr1) or ('客' in result and result[result.index('客')-1] in arr1) or ('卡' in result and result[result.index('卡')-1] in arr1):
-                            play(BASE_DIR+'/wav/const/清咖啡.wav')
-                        elif ('咖' in result and result[result.index('咖')-1] in arr2) or ('客' in result and result[result.index('客')-1] in arr2) or ('卡' in result and result[result.index('卡')-1] in arr2):
-                            play(BASE_DIR+'/wav/const/浓咖啡.wav')
-                        elif '咖啡' in result:
-                            play(BASE_DIR+'/wav/const/没听清.wav')
-                        elif '傻' in result:
-                            play(BASE_DIR+'/wav/const/傻.wav')
-                        elif '瞅' in result or '丑' in result:
-                            play(BASE_DIR+'/wav/const/瞅你.wav')
-                        elif '加' in result and '等' in result:
-                            left = result[:result.index('加')]
-                            right = result[result.index(
-                                '加')+1:result.index('等')]
-                            operater(left, right, '加')
-                        elif '加' in result and '等' not in result:
-                            left = result[:result.index('加')]
-                            right = result[result.index('加')+1:]
-                            operater(left, right, '加')
-                        elif '减' in result and '等' in result:
-                            left = result[:result.index('减')]
-                            right = result[result.index(
-                                '减')+1:result.index('等')]
-                            operater(left, right, '减')
-                        elif '减' in result and '等' not in result:
-                            left = result[:result.index('减')]
-                            right = result[result.index('减')+1:]
-                            operater(left, right, '减')
-                        elif '乘以' in result and '等' in result:
-                            left = result[:result.index('乘以')]
-                            right = result[result.index(
-                                '乘以')+2:result.index('等')]
-                            operater(left, right, '乘')
-                        elif '乘以' in result and '等' not in result:
-                            left = result[:result.index('乘以')]
-                            right = result[result.index('乘以')+2:]
-                            operater(left, right, '乘')
-                        elif '乘' in result and '等' in result:
-                            left = result[:result.index('乘')]
-                            right = result[result.index(
-                                '乘')+1:result.index('等')]
-                            operater(left, right, '乘')
-                        elif '乘' in result and '等' not in result:
-                            left = result[:result.index('乘')]
-                            right = result[result.index('乘')+1:]
-                            operater(left, right, '乘')
-                        elif '除以' in result and '等' in result:
-                            left = result[:result.index('除以')]
-                            right = result[result.index(
-                                '除以')+2:result.index('等')]
-                            operater(left, right, '除')
-                        elif '除以' in result and '等' not in result:
-                            left = result[:result.index('除以')]
-                            right = result[result.index('除以')+2:]
-                            operater(left, right, '除')
-                        elif '除' in result and '等' in result:
-                            left = result[:result.index('除')]
-                            right = result[result.index(
-                                '除')+1:result.index('等')]
-                            operater(left, right, '除')
-                        elif '除' in result and '等' not in result:
-                            left = result[:result.index('除')]
-                            right = result[result.index('除')+1:]
-                            operater(left, right, '除')
-                        else:
-                            pass
+            if os.path.exists(BASE_DIR + "/giveUp.txt"):
+                os.remove(BASE_DIR + "/giveUp.txt")
+                AIStatus = 'sleep'
+                cameraOpen = False
+            if AIStatus == 'wake':
+                if ('消订' in result) or ('取消' in result) or ('交订' in result) or ('订单' in result):
+                    play(BASE_DIR+'/wav/const/取消订单.wav')
+                    AIStatus = 'sleep'
+                    cameraOpen = False
+                    checkStartSTatus = False
+                elif (('清咖' in result) or ('轻咖' in result) or ('轻卡' in result) or ('青卡' in result) or ('清卡' in result)) and cameraOpen and not checkStartSTatus:
+                    play(BASE_DIR+'/wav/const/清咖啡.wav')
+                    checkStartTime = time.time()
+                    checkStartSTatus = True
+                elif (('农卡' in result) or ('浓卡' in result) or ('浓咖' in result) or ('农咖' in result)) and cameraOpen and not checkStartSTatus:
+                    play(BASE_DIR+'/wav/const/浓咖啡.wav')
+                    checkStartTime = time.time()
+                    checkStartSTatus = True
+                elif ('咖' in result or '啡' in result) and not cameraOpen and not checkStartSTatus:
+                    cameraOpen = True
+                    cameraP = Process(target=cameraProcess)
+                    cameraP.start()
+                    play(BASE_DIR+'/wav/const/身份验证.wav')
+                    with open(BASE_DIR + "/cameraP.txt", "w") as f:
+                        f.write(str(cameraP.pid))
+                elif ('咖' in result or '啡' in result) and cameraOpen and not checkStartSTatus:
+                    play(BASE_DIR+'/wav/const/没听清.wav')
+                elif '没有' in result and not checkStartSTatus:
+                    play(BASE_DIR+'/wav/const/讨厌.wav')
+                elif '傻' in result and not checkStartSTatus:
+                    play(BASE_DIR+'/wav/const/傻.wav')
+                elif '瞅' in result and not checkStartSTatus:
+                    play(BASE_DIR+'/wav/const/瞅你.wav')
+                elif '好听' in result and not checkStartSTatus:
+                    play(BASE_DIR+'/wav/const/开心.wav')
+                elif '加' in result and '等' in result and not checkStartSTatus:
+                    left = result[:result.index('加')]
+                    right = result[result.index(
+                        '加')+1:result.index('等')]
+                    operater(left, right, '加')
+                elif '加' in result and '等' not in result and not checkStartSTatus:
+                    left = result[:result.index('加')]
+                    right = result[result.index('加')+1:]
+                    operater(left, right, '加')
+                elif '减' in result and '等' in result and not checkStartSTatus:
+                    left = result[:result.index('减')]
+                    right = result[result.index(
+                        '减')+1:result.index('等')]
+                    operater(left, right, '减')
+                elif '减' in result and '等' not in result and not checkStartSTatus:
+                    left = result[:result.index('减')]
+                    right = result[result.index('减')+1:]
+                    operater(left, right, '减')
+                elif '乘以' in result and '等' in result and not checkStartSTatus:
+                    left = result[:result.index('乘以')]
+                    right = result[result.index(
+                        '乘以')+2:result.index('等')]
+                    operater(left, right, '乘')
+                elif '乘以' in result and '等' not in result and not checkStartSTatus:
+                    left = result[:result.index('乘以')]
+                    right = result[result.index('乘以')+2:]
+                    operater(left, right, '乘')
+                elif '乘' in result and '等' in result and not checkStartSTatus:
+                    left = result[:result.index('乘')]
+                    right = result[result.index(
+                        '乘')+1:result.index('等')]
+                    operater(left, right, '乘')
+                elif '乘' in result and '等' not in result and not checkStartSTatus:
+                    left = result[:result.index('乘')]
+                    right = result[result.index('乘')+1:]
+                    operater(left, right, '乘')
+                elif '除以' in result and '等' in result and not checkStartSTatus:
+                    left = result[:result.index('除以')]
+                    right = result[result.index(
+                        '除以')+2:result.index('等')]
+                    operater(left, right, '除')
+                elif '除以' in result and '等' not in result and not checkStartSTatus:
+                    left = result[:result.index('除以')]
+                    right = result[result.index('除以')+2:]
+                    operater(left, right, '除')
+                elif '除' in result and '等' in result and not checkStartSTatus:
+                    left = result[:result.index('除')]
+                    right = result[result.index(
+                        '除')+1:result.index('等')]
+                    operater(left, right, '除')
+                elif '除' in result and '等' not in result and not checkStartSTatus:
+                    left = result[:result.index('除')]
+                    right = result[result.index('除')+1:]
+                    operater(left, right, '除')
+                else:
+                    pass
         else:
             print('Recognizer failed!')
     except ValueError:
         print('The response is not json format string')
     conn.close()
-
-
-class GenderThread (threading.Thread):
-    """  
-    获取性别线程
-    """
-
-    def __init__(self, path):
-        threading.Thread.__init__(self)
-        self.path = path
-
-    def run(self):
-        self.res = getGender(self.path)
-
-    def getResult(self):
-        threading.Thread.join(self)
-        try:
-            return self.res
-        except:
-            return None

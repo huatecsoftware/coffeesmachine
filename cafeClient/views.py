@@ -123,10 +123,12 @@ def failOrder(request):
         pass
     return JsonResponse({'ok': 'ok'})
 
-proid=''
+
+proid = ''
+
 
 @csrf_exempt
-def faceRecognition(request):
+def intelligenceModel(request):
     """  
         智能模式开启语音和视频进程
     """
@@ -135,7 +137,7 @@ def faceRecognition(request):
     if switch:
         recordP = Process(target=recordProcess)
         recordP.start()
-        proid=str(recordP.pid)
+        proid = str(recordP.pid)
     else:
         cmd = 'taskkill /pid ' + str(proid) + ' /f'
         try:
@@ -151,9 +153,24 @@ def deleteTempFile(request):
         放弃注册删除图片
     """
     global newPic
-    if os.path.exists(BASE_DIR+'/faces/%s' % newPic):
+    try:
         os.remove(BASE_DIR+'/faces/%s' % newPic)
-    return JsonResponse({'res': 'res'})
+    except:
+        pass
+    os.remove(BASE_DIR + "/name.txt")
+    with open(BASE_DIR + "/giveUp.txt", 'w') as f:
+        f.write('giveUp')
+    if os.path.exists(BASE_DIR + "/cameraP.txt"):
+        with open(BASE_DIR + "/cameraP.txt", "r") as f:
+            pid = f.readline()
+            f.close()
+            os.remove(BASE_DIR + "/cameraP.txt")
+            cmd = 'taskkill /pid ' + pid + ' /f'
+            try:
+                os.system(cmd)
+            except Exception as e:
+                print(e)
+    return JsonResponse({'res': 'ok'})
 
 
 @csrf_exempt
@@ -161,6 +178,16 @@ def addUser(request):
     """ 
         用户注册函数
     """
+    if os.path.exists(BASE_DIR + "/cameraP.txt"):
+        with open(BASE_DIR + "/cameraP.txt", "r") as f:
+            pid = f.readline()
+            f.close()
+            os.remove(BASE_DIR + "/cameraP.txt")
+            cmd = 'taskkill /pid ' + pid + ' /f'
+            try:
+                os.system(cmd)
+            except Exception as e:
+                print(e)
     param = json.loads(request.body)
     res = 'ok'
     userNums = User.objects.filter(Q(phone=param['userParam']['phone']))
@@ -172,9 +199,9 @@ def addUser(request):
     user.picture = 'http://127.0.0.1:8000/faces/%s%s.jpg' % (
         param['userParam']['name'], param['userParam']['phone'])
     user.save()
-    os.remove(BASE_DIR +"/name.txt")
-    with open(BASE_DIR + "/register.txt", "w") as f:
-        f.write('done')
+    os.remove(BASE_DIR + "/name.txt")
+    TTS('%s%s您好，欢迎光临，请问您要哪种咖啡呢?' %
+        (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:]))
     """     res = 'ok'
     else:
         res = 'err' """

@@ -75,8 +75,8 @@ async def PLCServer(websocket, path):
                     robotBusy, coverLess, coverNo, tagErr, tagNotice, repo1, repo2, repo3, repo4, repo5, platformIng, cafe1Plat, cafe2Plat, robotNoA, robotNoB, cupLess, cupNo, guangMu, playing, equipments, repos, aError, bError) = plcAnalysis(res1, res2, res3, res4, res5, res6) """
             await websocket.send(json.dumps({'repos': [0, 0, 0, 0, 0], 'aError': 0, 'bError': 0, 'coverLess': 0, 'cupLess': 0, 'cafe1Material': 0, 'cafe2Material': 0, 'robotErr': 1, 'cafe1Rubbish': 0, 'cafe2Rubbish': 0, 'cupNo': 0, 'coverNo': 0, 'tagErr': 0, 'guangMu': 0, 'equipment': equipments, 'cafeFin': 0, 'm130': 0, 'm131': 0, 'cafe1Fin': 0, 'cafe2Fin': 0}))
 
-onlyOnce = True
 lastWave = []
+onlyOnce = True
 
 
 async def AI(websocket, path):
@@ -84,7 +84,7 @@ async def AI(websocket, path):
         智能模式语音问候
         如果是第一次注册则进行语音合成，下次同一个人再次识别时直接播放上次保存的文件，减小网络开销
     """
-    global onlyOnce, lastWave
+    global lastWave,onlyOnce
     async for message in websocket:
         while True:
             person = ''
@@ -93,27 +93,24 @@ async def AI(websocket, path):
                     person = f.readline()
                     f.close()
                     if person != 'unknown':
+                        play(BASE_DIR + "/wav/known/%s.wav" % person)
                         os.remove(BASE_DIR + "/name.txt")
-                        knowList = list(
-                            map(lambda obj: obj[:-4], os.listdir(BASE_DIR + "/wav/known")))
-                        if person in knowList:
-                            play(BASE_DIR + "/wav/known/%s.wav" % person)
-                        else:
-                            gr = GenderThread(
-                                BASE_DIR + "/faces/%s.jpg" % person)
-                            gr.start()
-                            faceStatus = gr.getResult()
-                            gender = '先生' if faceStatus['faces'][0]['attributes']['gender']['value'] == 'Male' else '女士'
-                            TTS('%s%s您好，欢迎光临，要来杯咖啡么' %
-                                (person[:-4], gender), BASE_DIR + "/wav/known/%s.wav" % person)
-                        with open(BASE_DIR +"/welcome.txt", "w") as f:
-                            f.write(str(time.time()))
+                        if os.path.exists(BASE_DIR + "/cameraP.txt"):
+                            with open(BASE_DIR + "/cameraP.txt", "r") as f:
+                                pid = f.readline()
+                                f.close()
+                                os.remove(BASE_DIR + "/cameraP.txt")
+                                cmd = 'taskkill /pid ' + pid + ' /f'
+                                try:
+                                    os.system(cmd)
+                                except Exception as e:
+                                    print(e)
                     else:
                         if onlyOnce:
-                            onlyOnce = False
+                            onlyOnce=False
                             play(BASE_DIR+'/wav/const/不认识.wav')
             else:
-                onlyOnce = True
+                onlyOnce=True
             try:
                 wave = np.loadtxt(BASE_DIR+'/wave.txt').tolist()
                 lastWave = wave
