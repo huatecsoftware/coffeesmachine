@@ -37,7 +37,7 @@ urlpatterns = [
     url(r'^searchOrder/', views.searchOrder, name='searchOrder'),
     url(r'^queryAllOrder/', views.queryAllOrder, name='queryAllOrder'),
     url(r'^deleteTempFile/', views.deleteTempFile, name='deleteTempFile'),
-    url(r'^faceRecognition/', views.faceRecognition, name='faceRecognition'),
+    url(r'^intelligenceModel/', views.intelligenceModel, name='intelligenceModel'),
     url(r'^cafeClient/(?P<path>.*)$', serve,
         {'document_root': BASE_DIR+'/cafeClient'}),
 ]
