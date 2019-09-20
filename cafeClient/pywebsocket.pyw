@@ -93,7 +93,7 @@ async def AI(websocket, path):
                     person = f.readline()
                     f.close()
                     if person != 'unknown':
-                        play(BASE_DIR + "/wav/known/%s.wav" % person)
+                        PlayThread(BASE_DIR + "/wav/known/%s.wav" % person).start()
                         os.remove(BASE_DIR + "/name.txt")
                         if os.path.exists(BASE_DIR + "/cameraP.txt"):
                             with open(BASE_DIR + "/cameraP.txt", "r") as f:
@@ -103,7 +103,7 @@ async def AI(websocket, path):
                                 cmd = 'taskkill /pid ' + pid + ' /f'
                                 try:
                                     os.system(cmd)
-                                    await asyncio.sleep(5)
+                                    await asyncio.sleep(10)
                                     with open(BASE_DIR +"/waitListen.txt", "w") as f:
                                         f.write('waitListen')
                                 except Exception as e:
@@ -111,7 +111,7 @@ async def AI(websocket, path):
                     else:
                         if onlyOnce:
                             onlyOnce=False
-                            play(BASE_DIR+'/wav/const/不认识.wav')
+                            PlayThread(BASE_DIR+'/wav/const/不认识.wav').start()
             else:
                 onlyOnce=True
             try:
