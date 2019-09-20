@@ -125,6 +125,23 @@
     font-family: 'SimSun';
 }
 
+label{
+    font-weight: bold;
+    font-family: 'simsun';
+    font-size: 1.5vw!important;
+}
+
+.registerForm{
+    width: 100%;
+}
+
+:global(.ant-modal-title){
+    text-align: center;
+    font-family: 'simsun';
+    font-size: 1.5vw!important;
+    font-weight: bold!important;
+}
+
 :global(.ant-form-item-required), :global(.ant-steps-item-title) {
     color: black;
     user-select: none;

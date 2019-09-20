@@ -1,4 +1,5 @@
 import React from 'react'
+import styles from './styles.css'
 import { Form, Input, Button, Radio, message, Row } from 'antd'
 
 const RadioGroup = Radio.Group
@@ -82,7 +83,7 @@ class RegistrationForm extends React.Component {
             },
         }
 
-        return <Form {...formItemLayout} onSubmit={this.handleSubmit}>
+        return <Form {...formItemLayout} hideRequiredMark={true} onSubmit={this.handleSubmit}>
             <Form.Item label='姓名'>
                 {getFieldDecorator('name', {
                     rules: [
@@ -91,12 +92,12 @@ class RegistrationForm extends React.Component {
                             message: '请输入您的姓名',
                         },
                     ],
-                })(<Input onChange={e => this.recordUserParam(e, 'name', this.dispatch)} />)}
+                })(<Input autoComplete='off' className={styles.registerForm} onChange={e => this.recordUserParam(e, 'name', this.dispatch)} />)}
             </Form.Item>
             <Form.Item label='手机'>
                 {getFieldDecorator('phone', {
                     rules: [{ required: true, message: '请输入您的手机号' }],
-                })(<Input onChange={e => this.recordUserParam(e, 'phone', this.dispatch)} />)}
+                })(<Input autoComplete='off' className={styles.registerForm} onChange={e => this.recordUserParam(e, 'phone', this.dispatch)} />)}
             </Form.Item>
             <Form.Item label='性别'>
                 {getFieldDecorator('gender', {
@@ -104,7 +105,7 @@ class RegistrationForm extends React.Component {
                 })(<RadioGroup options={['先生', '女士']} onChange={e => this.recordUserParam(e, 'gender', this.dispatch)} />)}
             </Form.Item>
             <Form.Item label='照片'>
-                {getFieldDecorator('picture', {})(<Button disabled={(userParam.name === '' || userParam.phone === '') ? true : false} onClick={() => this.photograph(userParam)}>拍照</Button>)}
+                {getFieldDecorator('picture', {})(<Button type='primary' className={styles.registerForm} disabled={(userParam.name === '' || userParam.phone === '') ? true : false} onClick={() => this.photograph(userParam)}>拍照</Button>)}
             </Form.Item>
             <Form.Item {...tailFormItemLayout}>
                 <Row type='flex' justify='space-around'>

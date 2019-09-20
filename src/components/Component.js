@@ -1,7 +1,7 @@
 import styles from './styles.css'
 import Register from './Register'
 import * as utils from '../utils/utils'
-import { Breadcrumb, Icon, Modal, Row, Button, Table, Steps, Result } from 'antd'
+import { Breadcrumb, Icon, Modal, Row, Button, Table, Steps, Result, Divider } from 'antd'
 
 const { Step } = Steps
 
@@ -50,14 +50,41 @@ const SuccessModal = ({ nextModal, dispatch }) => {
     </Modal>
 }
 const RegistModal = ({ dispatch, userParam, registModal, restFields, photograph }) => {
+
+    const current = () => {
+        if (userParam.name === '' && userParam.gender === '' && userParam.phone === '') {
+            return 0
+        }
+        if (userParam.name !== '' && userParam.gender === '' && userParam.phone === '') {
+            return 1
+        }
+        if (userParam.name !== '' && userParam.gender === '' && userParam.phone !== '') {
+            return 2
+        }
+        if (userParam.name !== '' && userParam.gender !== '' && userParam.phone !== '') {
+            return 3
+        }
+    }
+
     return <Modal
-        width={300}
+        width={500}
         footer={null}
         centered={true}
         closable={false}
+        title='新用户注册'
         visible={registModal}
     >
-        <Register userParam={userParam} dispatch={dispatch} restFields={restFields} photograph={photograph} />
+        <div className={styles.flexRow}>
+            <Register userParam={userParam} dispatch={dispatch} restFields={restFields} photograph={photograph} />
+            <Divider style={{ marginLeft: '48px', height: '300px' }} dashed={true} type="vertical" />
+            <Steps direction="vertical" current={photograph ? 4 : current()} size='small' style={{ position: "absolute", left: '70%' }}>
+                <Step title="姓名" description="请填写姓名" />
+                <Step title="手机 " description="请填写手机" />
+                <Step title="性别" description="请选择性别" />
+                <Step title="拍照" description="请点击拍照" />
+                <Step title="注册" description="确认/放弃" />
+            </Steps>
+        </div>
     </Modal>
 }
 const CheckInfoModal = ({ checkModal, dispatch, params, checkInfo }) => {
