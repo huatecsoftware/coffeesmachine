@@ -333,17 +333,19 @@ th, td {
     background-size: 100% 100%;
 }
 
+
+
 .lessOrder {
     width: 33.33vw;
     height: 90vh;
 }
 .canvas{
     width: 33.33vw;
-    height: 20vh;
+    height: 26vh;
     background: snow;
     position: absolute;
     left:66.66vw;
-    top:80vh;
+    top:74vh;
     z-index: 999;
 }
 

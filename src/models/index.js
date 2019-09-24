@@ -17,6 +17,7 @@ export default {
     messages: [],
     orderIng: [],
     orderFin: [],
+    features: [],
     lessOrder: [],
     splineData: [],
     equipments: [],
@@ -46,6 +47,13 @@ export default {
       yield put({
         type: 'saveSwitch',
         checked
+      })
+    },
+    *calcFeature({ _ }, { call, put }) {
+      const response = yield call(api.calcFeature)
+      yield put({
+        type: 'saveFeature',
+        features: response.data.res
       })
     },
     *isNewUser({ person, wave }, { put }) {
@@ -493,6 +501,12 @@ export default {
       return {
         ...state,
         userParam: action.userParam
+      }
+    },
+    saveFeature(state, action) {
+      return {
+        ...state,
+        features: action.features
       }
     },
     saveSwitch(state, action) {

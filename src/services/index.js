@@ -48,3 +48,6 @@ export function deleteTempFile(param) {
 export function photograph(param) {
   return requestPOST(`http://${host}:${port}/photograph/`, param)
 }
+export function calcFeature(param) {
+  return requestPOST(`http://${host}:${port}/calcFeature/`, param)
+}
