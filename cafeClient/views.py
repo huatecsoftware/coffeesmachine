@@ -148,6 +148,12 @@ def intelligenceModel(request):
 
 
 @csrf_exempt
+def calcFeature(request):
+    feature = loadKnowFace()
+    return JsonResponse({"res": feature})
+
+
+@csrf_exempt
 def deleteTempFile(request):
     """  
         放弃注册删除图片
@@ -201,7 +207,7 @@ def addUser(request):
     user.save()
     os.remove(BASE_DIR + "/name.txt")
     TTSThread('%s%s您好，欢迎光临，请问您要哪种咖啡呢?' %
-        (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:])).start()
+              (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:])).start()
     """     res = 'ok'
     else:
         res = 'err' """

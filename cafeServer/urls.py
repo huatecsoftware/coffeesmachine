@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^failOrder/', views.failOrder, name='failOrder'),
     url(r'^rangeClick/', views.rangeClick, name='rangeClick'),
     url(r'^photograph/', views.photograph, name='photograph'),
+    url(r'^calcFeature/', views.calcFeature, name='calcFeature'),
     url(r'^searchOrder/', views.searchOrder, name='searchOrder'),
     url(r'^queryAllOrder/', views.queryAllOrder, name='queryAllOrder'),
     url(r'^deleteTempFile/', views.deleteTempFile, name='deleteTempFile'),

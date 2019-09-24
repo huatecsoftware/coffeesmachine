@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': 'cafedb',
         'USER': 'root',
         'PASSWORD': '1234',
-        'HOST': 'localhost',
+        'HOST': '192.168.0.111',
         'PORT': '3306',
         'TEST': {
                 'CHARSET': 'utf8',
@@ -93,7 +93,6 @@ DATABASES = {
         }
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

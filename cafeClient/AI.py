@@ -3,7 +3,6 @@ import cv2
 import time
 import json
 import wave
-import psutil
 import random
 import datetime
 import threading
@@ -90,7 +89,8 @@ def loadKnowFace():
     for face in os.listdir(BASE_DIR+'/faces'):
         faceEncode = face_recognition.face_encodings(
             face_recognition.load_image_file(BASE_DIR+'/faces/'+face))[0]
-        knownEncoding[face[:-4]] = faceEncode
+        #knownEncoding[face[:-4]] = faceEncode
+        knownEncoding[face[:-4]] = faceEncode.tolist()
     return knownEncoding
 
 
