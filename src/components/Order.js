@@ -1,17 +1,16 @@
 import React from 'react'
-import Face from './Face'
 import { connect } from 'dva'
 import VoicePlot from './VoicePlot'
 import UserConfig from './UserConfig'
 import * as Component from './Component'
 import styles from '../components/styles.css'
 
-/* const aiSocket = new WebSocket('ws://127.0.0.1:8899/AI')
+const aiSocket = new WebSocket('ws://127.0.0.1:8899/AI')
 aiSocket.onopen = () => {
     aiSocket.send('start')
     console.log('数据发送中...')
 }
- */
+
 class Order extends React.Component {
     constructor(props) {
         super(props)
@@ -27,14 +26,14 @@ class Order extends React.Component {
         } */
         //setInterval(queryRcv, 1000)
 
-        /* aiSocket.onmessage = (res) => {
+        aiSocket.onmessage = (res) => {
             const data = JSON.parse(res.data)
             this.props.dispatch({
                 type: 'Index/isNewUser',
                 person: data.person,
                 wave: data.wave,
             })
-        } */
+        }
 
     }
 
@@ -50,7 +49,6 @@ class Order extends React.Component {
             <div className={`${styles.container} ${styles.flexRow}`}>
                 <div className={`${styles.left} ${styles.flexCol}`}>
                     <Component.CafeType params={params} dispatch={this.dispatch} />
-                    <Face /> 
                     <UserConfig dispatch={this.dispatch} params={params} restFields={restFields} checked={checked} />
                     <Component.ProgStep step={step} />
                 </div>
