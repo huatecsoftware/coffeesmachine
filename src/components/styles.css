@@ -125,17 +125,17 @@
     font-family: 'SimSun';
 }
 
-label{
+label {
     font-weight: bold;
     font-family: 'simsun';
     font-size: 1.5vw!important;
 }
 
-.registerForm{
+.registerForm {
     width: 100%;
 }
 
-:global(.ant-modal-title){
+:global(.ant-modal-title) {
     text-align: center;
     font-family: 'simsun';
     font-size: 1.5vw!important;
@@ -322,7 +322,6 @@ th, td {
     border-right: 4px groove snow;
 }
 
-
 .right {
     background: url(../assets/note1.png);
     background-size: 100% 100%;
@@ -333,22 +332,62 @@ th, td {
     background-size: 100% 100%;
 }
 
-
-
 .lessOrder {
     width: 33.33vw;
     height: 90vh;
 }
-.canvas{
+
+.voiceAnima {
     width: 33.33vw;
-    height: 26vh;
+    height: 30vh;
     background: snow;
     position: absolute;
-    left:66.66vw;
-    top:74vh;
+    left: 66.66vw;
+    top: 70vh;
     z-index: 999;
 }
 
+@keyframes loopScale {
+    from {
+        width: 40px;
+        height: 40px;
+        opacity: 1;
+    }
+    to {
+        width: 200px;
+        height: 200px;
+        opacity: 0.2;
+    }
+}
+
+.circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: absolute;
+    border: 3px dashed black;
+    animation: loopScale 3s infinite ease-in-out
+}
+.circleBack{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    background: url(../assets/mic.png);
+    background-size: 100% 100%
+}
+
+.circle1{
+    border: 3px dashed black;
+    animation-delay: 0.5s
+}
+.circle2{
+    border: 3px dashed black;
+    animation-delay: 1.5s
+}
+.circle3{
+    border: 3px dashed black;
+    animation-delay: 2.5s
+}
 
 .tasteName {
     font-size: 2vw;

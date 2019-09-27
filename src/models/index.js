@@ -8,7 +8,6 @@ export default {
 
   state: {
     step: 0,
-    wave: [],
     error: '',
     hints: [],
     range: [],
@@ -56,11 +55,7 @@ export default {
         features: response.data.res
       })
     },
-    *isNewUser({ person, wave }, { put }) {
-      yield put({
-        type: 'saveWave',
-        wave
-      })
+    *isNewUser({ person }, { put }) {
       if (person === 'unknown') {
         yield put({
           type: 'saveRegistModal',
@@ -470,12 +465,6 @@ export default {
       return {
         ...state,
         registModal: action.visible,
-      }
-    },
-    saveWave(state, action) {
-      return {
-        ...state,
-        wave: action.wave,
       }
     },
     saveSeries(state, action) {

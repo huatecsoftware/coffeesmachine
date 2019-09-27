@@ -178,6 +178,16 @@ const OrderShow = ({ lessCol, lessOrder }) => {
         className={styles.lessOrder}
     />
 }
+
+const VoicePlot = ({ checked }) => {
+    return <div className={`${styles.voiceAnima} ${styles.flexRow}`} style={{ alignItems: "center", justifyContent: "center", display: checked ? "flex" : "none" }}>
+        <div className={styles.circleBack}></div>
+        <div className={styles.circle}></div>
+        <div className={`${styles.circle} ${styles.circle1}`}></div>
+        <div className={`${styles.circle} ${styles.circle2}`}></div>
+        <div className={`${styles.circle} ${styles.circle3}`}></div>
+    </div>
+}
 const ProgStep = ({ step }) => {
     return <div className={styles.stepContainer}>
         <Steps current={step} className={`${styles.steps} ${styles.flexRow}`}>
@@ -188,4 +198,4 @@ const ProgStep = ({ step }) => {
     </div>
 }
 
-export { Header, Breads, CafeType, SuccessModal, CheckInfoModal, EquipmentState, EquipmentButton, FollowTable, ScrollWord, FollowError, OrderShow, ProgStep, RegistModal }
+export { VoicePlot,Header, Breads, CafeType, SuccessModal, CheckInfoModal, EquipmentState, EquipmentButton, FollowTable, ScrollWord, FollowError, OrderShow, ProgStep, RegistModal }

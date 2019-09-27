@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'dva'
-import VoicePlot from './VoicePlot'
 import UserConfig from './UserConfig'
 import * as Component from './Component'
 import styles from '../components/styles.css'
@@ -31,7 +30,6 @@ class Order extends React.Component {
             this.props.dispatch({
                 type: 'Index/isNewUser',
                 person: data.person,
-                wave: data.wave,
             })
         }
 
@@ -54,7 +52,7 @@ class Order extends React.Component {
                 </div>
                 <div className={`${styles.right} ${styles.flexCol}`}>
                     <Component.OrderShow lessCol={this.lessCol} lessOrder={lessOrder} />
-                    <VoicePlot checked={checked} />
+                    <Component.VoicePlot checked={checked} />
                 </div>
             </div>
         </div>
