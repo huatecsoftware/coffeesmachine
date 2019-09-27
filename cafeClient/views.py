@@ -203,7 +203,7 @@ def addUser(request):
     user.gender = param['userParam']['gender']
     user.phone = param['userParam']['phone']
     user.picture = 'http://127.0.0.1:8000/faces/%s%s.jpg' % (
-        param['userParam']['name'], param['userParam']['phone'])
+        param['userParam']['name'], param['userParam']['phone'][-4:])
     user.save()
     os.remove(BASE_DIR + "/name.txt")
     TTSThread('%s%s您好，欢迎光临，请问您要哪种咖啡呢?' %

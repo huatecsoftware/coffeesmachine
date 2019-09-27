@@ -7,6 +7,7 @@ import websockets
 from utils import *
 from HslCommunication import *
 
+
 #siemens = SiemensS7Net(SiemensPLCS.S1200, "192.168.1.100")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -75,19 +76,18 @@ async def PLCServer(websocket, path):
                     robotBusy, coverLess, coverNo, tagErr, tagNotice, repo1, repo2, repo3, repo4, repo5, platformIng, cafe1Plat, cafe2Plat, robotNoA, robotNoB, cupLess, cupNo, guangMu, playing, equipments, repos, aError, bError) = plcAnalysis(res1, res2, res3, res4, res5, res6) """
             await websocket.send(json.dumps({'repos': [0, 0, 0, 0, 0], 'aError': 0, 'bError': 0, 'coverLess': 0, 'cupLess': 0, 'cafe1Material': 0, 'cafe2Material': 0, 'robotErr': 1, 'cafe1Rubbish': 0, 'cafe2Rubbish': 0, 'cupNo': 0, 'coverNo': 0, 'tagErr': 0, 'guangMu': 0, 'equipment': equipments, 'cafeFin': 0, 'm130': 0, 'm131': 0, 'cafe1Fin': 0, 'cafe2Fin': 0}))
 
-lastWave = []
 onlyOnce = True
-
 
 async def AI(websocket, path):
     """  
         智能模式语音问候
         如果是第一次注册则进行语音合成，下次同一个人再次识别时直接播放上次保存的文件，减小网络开销
     """
-    global lastWave,onlyOnce
+    global onlyOnce
     async for message in websocket:
         while True:
             person = ''
+            await asyncio.sleep(0.5)
             if os.path.exists(BASE_DIR + '/name.txt'):
                 with open(BASE_DIR+'/name.txt', "r") as f:
                     person = f.readline()
@@ -103,9 +103,6 @@ async def AI(websocket, path):
                                 cmd = 'taskkill /pid ' + pid + ' /f'
                                 try:
                                     os.system(cmd)
-                                    await asyncio.sleep(10)
-                                    with open(BASE_DIR +"/waitListen.txt", "w") as f:
-                                        f.write('waitListen')
                                 except Exception as e:
                                     print(e)
                     else:
@@ -114,12 +111,7 @@ async def AI(websocket, path):
                             PlayThread(BASE_DIR+'/wav/const/不认识.wav').start()
             else:
                 onlyOnce=True
-            try:
-                wave = np.loadtxt(BASE_DIR+'/wave.txt').tolist()
-                lastWave = wave
-            except:
-                wave = lastWave
-            await websocket.send(json.dumps({'person': person, 'wave': wave}))
+            await websocket.send(json.dumps({'person': person}))
 
 start_server = websockets.serve(PLCServer, '127.0.0.1', 8765)
 asyncio.get_event_loop().run_until_complete(start_server)

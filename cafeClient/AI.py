@@ -1,8 +1,10 @@
 import os
+import sys
 import cv2
 import time
 import json
 import wave
+import django
 import random
 import datetime
 import threading
@@ -11,15 +13,21 @@ import numpy as np
 import urllib.parse
 import urllib.request
 import face_recognition
+from django.db.models import Q
 from multiprocessing import Process
 from pyaudio import PyAudio, paInt16
 from aliyunsdkcore.client import AcsClient
 from PIL import Image, ImageDraw, ImageFont
 from aliyunsdkcore.request import CommonRequest
 
+sys.path.append('D://work/cafeBack')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'cafeServer.settings'
+django.setup()
+
 BASE_DIR = BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 
+cafeType = ''
 onlyOne = True
 noListen = True
 AIStatus = 'sleep'
@@ -50,6 +58,7 @@ def operater(left, right, operator):
     right:操作符右边的数
     operator:操作符
     """
+    global wakeTime
     if operator == "加":
         answer = str(float(left)+float(right))
         if answer.split('.')[1] == '0':
@@ -57,6 +66,7 @@ def operater(left, right, operator):
         else:
             answer = float(answer)
         TTS('当然是等于%s啦' % answer, BASE_DIR+'/wav/calc/calc.wav')
+        wakeTime = time.time()
     if operator == "减":
         answer = str(float(left)-float(right))
         if answer.split('.')[1] == '0':
@@ -64,6 +74,7 @@ def operater(left, right, operator):
         else:
             answer = float(answer)
         TTS('当然是等于%s啦' % answer, BASE_DIR+'/wav/calc/calc.wav')
+        wakeTime = time.time()
     if operator == "乘":
         answer = str(float(left)*float(right))
         if answer.split('.')[1] == '0':
@@ -71,6 +82,7 @@ def operater(left, right, operator):
         else:
             answer = float(answer)
         TTS('当然是等于%s啦' % answer, BASE_DIR+'/wav/calc/calc.wav')
+        wakeTime = time.time()
     if operator == "除":
         answer = str(float(left)/float(right))
         if answer.split('.')[1] == '0':
@@ -78,6 +90,7 @@ def operater(left, right, operator):
         else:
             answer = float(answer)
         TTS('当然是等于%s啦' % answer, BASE_DIR+'/wav/calc/calc.wav')
+        wakeTime = time.time()
 
 
 def loadKnowFace():
@@ -163,6 +176,9 @@ def cameraProcess():
                         with open(BASE_DIR+'/name.txt', 'w') as f:
                             f.write(name)
                             f.close()
+                        with open(BASE_DIR + "/user.txt", "w") as f:
+                            f.write(name)
+                            f.close()
                     face_names.append(name[:-4])
                 else:
                     faceTime = time.time()
@@ -188,7 +204,8 @@ def recordProcess():
     """  
     录音进程
     """
-    global checkStartTime, checkStartSTatus, AIStatus, cameraOpen, wakeTime, noListen
+    from cafeClient.models import User, modOrder
+    global checkStartTime, checkStartSTatus, AIStatus, cameraOpen, wakeTime, noListen, cafeType
     save_count = 0
     save_buffer = []
     # pyaudio对象，用来处理录音的音频流
@@ -201,56 +218,70 @@ def recordProcess():
         if checkStartSTatus:
             if int(time.time()-checkStartTime) == 10:
                 PlayThread(BASE_DIR+'/wav/const/等待制作.wav').start()
+                if os.path.exists(BASE_DIR + "/user.txt"):
+                    with open(BASE_DIR + "/user.txt", "r") as f:
+                        userInfo = f.readline()
+                        f.close()
+                        os.remove(BASE_DIR + "/user.txt")
+                        name = userInfo[:-4]
+                        phone = userInfo[-4:]
+                        user = User.objects.get(
+                            Q(phone__icontains=phone, name=name))
+                        order = modOrder()
+                        order.Status = '进行中'
+                        order.Uname = name
+                        order.Taste = cafeType
+                        order.Phone = user.phone
+                        order.Number = str(time.time())[:10]
+                        order.Gender = user.gender
+                        order.Stime = datetime.datetime.now()
+                        order.Etime = datetime.datetime.now()
+                        order.save()
                 checkStartSTatus = False
                 cameraOpen = False
                 AIStatus = 'sleep'
                 noListen = True
         if AIStatus == 'wake':
-            if int(time.time()-wakeTime) == 10 and noListen:
-                PlayThread(BASE_DIR + "/wav/const/等待回复.wav").start()
+            if int(time.time()-wakeTime) == 15 and noListen:
                 AIStatus = 'sleep'
                 cameraOpen = False
+                PlayThread(BASE_DIR+'/wav/const/睡觉.wav').start()
         if os.path.exists(BASE_DIR + "/giveUp.txt"):
             os.remove(BASE_DIR + "/giveUp.txt")
             AIStatus = 'sleep'
             cameraOpen = False
+            PlayThread(BASE_DIR+'/wav/const/睡觉.wav').start()
         if os.path.exists(BASE_DIR + "/faceTimeout.txt"):
             os.remove(BASE_DIR + "/faceTimeout.txt")
             AIStatus = 'sleep'
             cameraOpen = False
-        if os.path.exists(BASE_DIR + "/waitListen.txt"):
-            os.remove(BASE_DIR + "/waitListen.txt")
-            if not checkStartSTatus:
-                PlayThread(BASE_DIR + "/wav/const/等待回复.wav").start()
-                AIStatus = 'sleep'
-                cameraOpen = False
-        # 每次读取1500字节缓冲
-        string_audio_data = stream.read(1500)
-        # 将缓冲数据转换为ndarray
-        audio_data = np.frombuffer(string_audio_data, dtype=np.short)
-        np.savetxt(BASE_DIR + "/wave.txt", audio_data)
-        # 计算ndarray中数值大于1500的有多少个
-        large_sample_count = np.sum(audio_data > 1500)
-        # 大于1500的有20个以上时，保存这段录音，时长5秒
-        if large_sample_count > 20:
-            save_count = 5
-        else:
-            save_count -= 1
+        if not os.path.exists(BASE_DIR + "/play.txt"):
+            # 每次读取1500字节缓冲
+            string_audio_data = stream.read(1500)
+            # 将缓冲数据转换为ndarray
+            audio_data = np.frombuffer(string_audio_data, dtype=np.short)
+            # 计算ndarray中数值大于1500的有多少个
+            large_sample_count = np.sum(audio_data > 3000)
+            # 大于1500的有20个以上时，保存这段录音，时长5秒
+            if large_sample_count > 100:
+                save_count = 5
+            else:
+                save_count -= 1
 
-        if save_count < 0:
-            save_count = 0
+            if save_count < 0:
+                save_count = 0
 
-        if save_count > 0:
-            save_buffer.append(string_audio_data)
-        else:
-            # 将保存的缓冲数据拼接成一句完整的话，调用语音识别接口
-            if len(save_buffer) > 0:
-                content = b''
-                for buf in save_buffer:
-                    content = content + buf
-                if not os.path.exists(BASE_DIR + "/cameraP.txt"):
-                    STT(content)
-                save_buffer = []
+            if save_count > 0:
+                save_buffer.append(string_audio_data)
+            else:
+                # 将保存的缓冲数据拼接成一句完整的话，调用语音识别接口
+                if len(save_buffer) > 0:
+                    content = b''
+                    for buf in save_buffer:
+                        content = content + buf
+                    if not os.path.exists(BASE_DIR + "/cameraP.txt") and len(content) <= 72000:
+                        STT(content)
+                    save_buffer = []
 
 
 def TTS(text, filename):
@@ -285,7 +316,7 @@ def STT(audioContent):
     阿里语音识别接口
     audioContent:音频字节流
     """
-    global AIStatus, cameraOpen, checkStartTime, checkStartSTatus, wakeTime, noListen
+    global AIStatus, cameraOpen, checkStartTime, checkStartSTatus, wakeTime, noListen, cafeType
     host = 'nls-gateway.cn-shanghai.aliyuncs.com'
     httpHeaders = {
         'X-NLS-Token': getToken('LTAI4ycWN34khiO2', 'TazGS3zeb5eeBc2ZEmBUGuCAVo1t9e'),
@@ -306,24 +337,22 @@ def STT(audioContent):
             print('Recognize result: ' + result)
             # 热词唤醒，唤醒后状态改为wake，是否取消改为False
             if ('花' in result) or ('华' in result):
-                AIStatus = 'wake'
                 PlayThread(BASE_DIR+'/wav/const/唤醒.wav').start()
+                AIStatus = 'wake'
                 wakeTime = time.time()
-                result = ''
-            if AIStatus == 'sleep':
-                if len(result) > 1:
-                    PlayThread(BASE_DIR+'/wav/const/睡觉.wav').start()
-            if AIStatus == 'wake' and len(result) != 0:
+            if AIStatus == 'wake':
                 if ('消订' in result) or ('取消' in result) or ('交订' in result) or ('订单' in result):
                     PlayThread(BASE_DIR+'/wav/const/取消订单.wav').start()
                     noListen = True
                     AIStatus = 'sleep'
                     cameraOpen = False
+                    wakeTime = time.time()
                     checkStartSTatus = False
                 elif ('叫啥' in result or '名字' in result) and not checkStartSTatus:
                     PlayThread(random.choice([BASE_DIR+'/wav/const/小花.wav', BASE_DIR +
                                               '/wav/const/名字.wav'])).start()
                     noListen = False
+                    wakeTime = time.time()
                 elif ('男的' in result or '女的' in result or '性别' in result) and not checkStartSTatus:
                     answer = random.choice([BASE_DIR +
                                             '/wav/const/女孩.wav', BASE_DIR+'/wav/const/我是.wav'])
@@ -335,37 +364,49 @@ def STT(audioContent):
                         if res:
                             PlayThread(BASE_DIR+'/wav/const/骗你.wav').start()
                     noListen = False
+                    wakeTime = time.time()
                 elif ('什么' in result or '干啥' in result or '做啥' in result) and not checkStartSTatus:
                     PlayThread(BASE_DIR+'/wav/const/能做咖啡哦.wav').start()
+                    noListen = False
+                    wakeTime = time.time()
+                elif ('再见' in result or '拜拜' in result) and not checkStartSTatus:
+                    PlayThread(BASE_DIR+'/wav/const/byebye.wav').start()
+                    AIStatus = 'sleep'
                     noListen = False
                 elif ('几点' in result) and not checkStartSTatus:
                     dt = datetime.datetime.now()
                     TTSThread('现在是北京时间:%s年%s月%s号%s点%s分%s秒' % (dt.year, dt.month, dt.day, dt.hour,
                                                               dt.minute, dt.second), BASE_DIR + "/wav/const/time.wav").start()
                     noListen = False
+                    wakeTime = time.time()
                 elif ('周几' in result or '星期' in result) and not checkStartSTatus:
                     dt = datetime.datetime.now()
-                    TTSThread('今天是:周%s哦,' % dt.weekday(), BASE_DIR +
+                    TTSThread('今天是:周%s哦,' % (dt.weekday()+1), BASE_DIR +
                               "/wav/const/time.wav").start()
                     noListen = False
+                    wakeTime = time.time()
                 elif ('几号' in result) and not checkStartSTatus:
                     dt = datetime.datetime.now()
                     TTSThread('今天是:%s年%s月%s号哦' % (dt.year, dt.month,
                                                   dt.day), BASE_DIR + "/wav/const/time.wav").start()
                     noListen = False
+                    wakeTime = time.time()
                 elif ('几岁' in result or '多大' in result) and not checkStartSTatus:
                     PlayThread(random.choice([BASE_DIR+'/wav/const/18岁.wav', BASE_DIR +
                                               '/wav/const/没礼貌.wav', BASE_DIR+'/wav/const/年龄.wav'])).start()
                     noListen = False
+                    wakeTime = time.time()
                 elif (('清咖' in result) or ('轻咖' in result) or ('轻卡' in result) or ('青卡' in result) or ('新卡' in result) or ('听卡' in result) or ('新咖' in result) or ('听咖' in result) or ('清卡' in result)) and cameraOpen and not checkStartSTatus:
                     PlayThread(BASE_DIR+'/wav/const/清咖啡.wav').start()
                     checkStartTime = time.time()
+                    wakeTime = time.time()
                     cafeType = '清咖啡'
                     checkStartSTatus = True
                     noListen = False
                 elif (('农卡' in result) or ('浓卡' in result) or ('浓咖' in result) or ('农咖' in result)) and cameraOpen and not checkStartSTatus:
                     PlayThread(BASE_DIR+'/wav/const/浓咖啡.wav').start()
                     checkStartTime = time.time()
+                    wakeTime = time.time()
                     cafeType = '浓咖啡'
                     checkStartSTatus = True
                     noListen = False
@@ -373,7 +414,8 @@ def STT(audioContent):
                     PlayThread(BASE_DIR+'/wav/const/讨厌.wav').start()
                     AIStatus = 'sleep'
                     noListen = False
-                elif ('要' == result or '呵' == result or '喝' == result or '哥' == result or '和' == result or '河' == result or '咖' in result or '啡' in result) and not cameraOpen and not checkStartSTatus:
+                    wakeTime = time.time()
+                elif ('要' == result or '呵' == result or '对' == result or '嗯' == result or '喝' == result or '哥' == result or '和' == result or '河' == result or '咖' in result or '啡' in result) and not cameraOpen and not checkStartSTatus:
                     noListen = False
                     cameraOpen = True
                     cameraP = Process(target=cameraProcess)
@@ -381,18 +423,23 @@ def STT(audioContent):
                     PlayThread(BASE_DIR+'/wav/const/身份验证.wav').start()
                     with open(BASE_DIR + "/cameraP.txt", "w") as f:
                         f.write(str(cameraP.pid))
+                    wakeTime = time.time()-10
                 elif ('咖' in result or '啡' in result) and cameraOpen and not checkStartSTatus:
                     PlayThread(BASE_DIR+'/wav/const/没听清.wav').start()
                     noListen = False
+                    wakeTime = time.time()
                 elif '傻' in result and not checkStartSTatus:
                     PlayThread(BASE_DIR+'/wav/const/傻.wav').start()
                     noListen = False
+                    wakeTime = time.time()
                 elif '瞅' in result and not checkStartSTatus:
                     PlayThread(BASE_DIR+'/wav/const/瞅你.wav').start()
                     noListen = False
+                    wakeTime = time.time()
                 elif '好听' in result and not checkStartSTatus:
                     PlayThread(BASE_DIR+'/wav/const/开心.wav').start()
                     noListen = False
+                    wakeTime = time.time()
                 elif '加' in result and '等' in result and not checkStartSTatus:
                     noListen = False
                     left = result[:result.index('加')]
@@ -460,8 +507,9 @@ def STT(audioContent):
                     right = result[result.index('除')+1:]
                     operater(left, right, '除')
                 else:
-                    if len(result) > 1:
+                    if len(result) != 0 and '花' not in result and '华' not in result:
                         PlayThread(BASE_DIR+'/wav/const/听不懂.wav').start()
+                        wakeTime = time.time()
         else:
             print('Recognizer failed!')
     except ValueError:
@@ -489,6 +537,8 @@ class PlayThread (threading.Thread):
         语音播放
         audio:要播放的文件地址
         """
+        with open(BASE_DIR+'/play.txt', 'w') as f:
+            f.write('playing')
         wf = wave.open(self.audio, 'rb')
         p = PyAudio()
         stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
@@ -502,10 +552,12 @@ class PlayThread (threading.Thread):
         stream.stop_stream()
         stream.close()
         p.terminate()
+        if os.path.exists(BASE_DIR + "/play.txt"):
+            os.remove(BASE_DIR + "/play.txt")
 
     def getResult(self):
         threading.Thread.join(self)
         return True
 
 
-#TTS('我能帮您做咖啡呀，但是只有清咖啡和浓咖啡哦', BASE_DIR+'/wav/const/能做咖啡哦.wav')
+#TTS('长时未收到回复，进入睡眠模式', BASE_DIR+'/wav/const/睡觉.wav')
