@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'cafeClient'
+    'cafeClient',
 ]
 
 MIDDLEWARE = [
@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': 'cafedb',
         'USER': 'root',
         'PASSWORD': '1234',
-        'HOST': '192.168.0.111',
+        'HOST': '192.168.0.114',
         'PORT': '3306',
         'TEST': {
                 'CHARSET': 'utf8',
