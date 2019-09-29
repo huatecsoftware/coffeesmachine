@@ -174,7 +174,8 @@ def recordProcess():
     pa = PyAudio()
     stream = pa.open(format=paInt16, channels=1, rate=16000, input=True,
                      frames_per_buffer=1500)
-    print('开始录音')
+    with open(BASE_DIR + "/startRecord.txt", "w") as f:
+        f.write('startRecord')
     while True:
         if AIStatus == 'wake':
             if int(time.time()-checkStartTime) == 10 and checkStartStatus:

@@ -113,7 +113,7 @@ async def AI(websocket, path):
                             PlayThread(BASE_DIR+'/wav/const/不认识.wav').start()
             else:
                 onlyOnce = True
-            await websocket.send(json.dumps({'person': person, 'camera': os.path.exists(BASE_DIR + "/loadCamera.txt")}))
+            await websocket.send(json.dumps({'person': person, 'record': os.path.exists(BASE_DIR+'/startRecord.txt'), 'camera': os.path.exists(BASE_DIR + "/loadCamera.txt")}))
 
 start_server = websockets.serve(PLCServer, '127.0.0.1', 8765)
 asyncio.get_event_loop().run_until_complete(start_server)

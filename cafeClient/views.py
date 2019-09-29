@@ -142,6 +142,8 @@ def intelligenceModel(request):
         cmd = 'taskkill /pid ' + str(proid) + ' /f'
         try:
             os.system(cmd)
+            if os.path.exists(BASE_DIR+'/startRecord.txt'):
+                os.remove(BASE_DIR+'/startRecord.txt')
         except Exception as e:
             print(e)
     return JsonResponse({'ok': 'ok'})
