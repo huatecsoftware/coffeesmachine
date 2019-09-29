@@ -18,6 +18,7 @@ export default {
     orderFin: [],
     features: [],
     lessOrder: [],
+    camera: false,
     splineData: [],
     equipments: [],
     checked: false,
@@ -55,16 +56,18 @@ export default {
         features: response.data.res
       })
     },
-    *isNewUser({ person }, { put }) {
+    *isNewUser({ person, camera }, { put }) {
       if (person === 'unknown') {
         yield put({
           type: 'saveRegistModal',
-          visible: true
+          visible: true,
+          camera
         })
       } else {
         yield put({
           type: 'saveRegistModal',
-          visible: false
+          visible: false,
+          camera
         })
       }
     },
@@ -465,6 +468,7 @@ export default {
       return {
         ...state,
         registModal: action.visible,
+        camera: action.camera,
       }
     },
     saveSeries(state, action) {

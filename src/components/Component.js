@@ -1,7 +1,7 @@
 import styles from './styles.css'
 import Register from './Register'
 import * as utils from '../utils/utils'
-import { Breadcrumb, Icon, Modal, Row, Button, Table, Steps, Result, Divider } from 'antd'
+import { Breadcrumb, Icon, Modal, Row, Button, Table, Steps, Result, Divider, Progress } from 'antd'
 
 const { Step } = Steps
 
@@ -179,8 +179,15 @@ const OrderShow = ({ lessCol, lessOrder }) => {
     />
 }
 
-const VoicePlot = ({ checked }) => {
+const VoicePlot = ({ checked, camera }) => {
     return <div className={`${styles.voiceAnima} ${styles.flexRow}`} style={{ alignItems: "center", justifyContent: "center", display: checked ? "flex" : "none" }}>
+        <Progress
+            percent={100}
+            status="active"
+            showInfo={false}
+            strokeWidth={410}
+            style={{ display: camera ? 'block' : 'none' }}
+        />
         <div className={styles.circleBack}></div>
         <div className={styles.circle}></div>
         <div className={`${styles.circle} ${styles.circle1}`}></div>
@@ -198,4 +205,4 @@ const ProgStep = ({ step }) => {
     </div>
 }
 
-export { VoicePlot,Header, Breads, CafeType, SuccessModal, CheckInfoModal, EquipmentState, EquipmentButton, FollowTable, ScrollWord, FollowError, OrderShow, ProgStep, RegistModal }
+export { VoicePlot, Header, Breads, CafeType, SuccessModal, CheckInfoModal, EquipmentState, EquipmentButton, FollowTable, ScrollWord, FollowError, OrderShow, ProgStep, RegistModal }

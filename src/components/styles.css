@@ -345,6 +345,7 @@ th, td {
     left: 66.66vw;
     top: 70vh;
     z-index: 999;
+    overflow: hidden
 }
 
 @keyframes loopScale {
