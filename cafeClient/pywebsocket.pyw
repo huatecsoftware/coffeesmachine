@@ -78,6 +78,7 @@ async def PLCServer(websocket, path):
 
 onlyOnce = True
 
+
 async def AI(websocket, path):
     """  
         智能模式语音问候
@@ -93,7 +94,8 @@ async def AI(websocket, path):
                     person = f.readline()
                     f.close()
                     if person != 'unknown':
-                        PlayThread(BASE_DIR + "/wav/known/%s.wav" % person).start()
+                        PlayThread(BASE_DIR + "/wav/known/%s.wav" %
+                                   person).start()
                         os.remove(BASE_DIR + "/name.txt")
                         if os.path.exists(BASE_DIR + "/cameraP.txt"):
                             with open(BASE_DIR + "/cameraP.txt", "r") as f:
@@ -107,11 +109,11 @@ async def AI(websocket, path):
                                     print(e)
                     else:
                         if onlyOnce:
-                            onlyOnce=False
+                            onlyOnce = False
                             PlayThread(BASE_DIR+'/wav/const/不认识.wav').start()
             else:
-                onlyOnce=True
-            await websocket.send(json.dumps({'person': person}))
+                onlyOnce = True
+            await websocket.send(json.dumps({'person': person, 'camera': os.path.exists(BASE_DIR + "/loadCamera.txt")}))
 
 start_server = websockets.serve(PLCServer, '127.0.0.1', 8765)
 asyncio.get_event_loop().run_until_complete(start_server)

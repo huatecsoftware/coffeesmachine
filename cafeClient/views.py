@@ -164,8 +164,8 @@ def deleteTempFile(request):
     except:
         pass
     os.remove(BASE_DIR + "/name.txt")
-    with open(BASE_DIR + "/giveUp.txt", 'w') as f:
-        f.write('giveUp')
+    with open(BASE_DIR + "/toSleep.txt", 'w') as f:
+        f.write('toSleep')
     if os.path.exists(BASE_DIR + "/cameraP.txt"):
         with open(BASE_DIR + "/cameraP.txt", "r") as f:
             pid = f.readline()
@@ -206,7 +206,7 @@ def addUser(request):
         param['userParam']['name'], param['userParam']['phone'][-4:])
     user.save()
     os.remove(BASE_DIR + "/name.txt")
-    TTSThread('%s%s您好，欢迎光临，请问您要哪种咖啡呢?' %
+    TTSThread('%s%s您好，欢迎光临，请问您要清咖啡还是浓咖啡呢?' %
               (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:])).start()
     """     res = 'ok'
     else:
