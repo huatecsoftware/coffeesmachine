@@ -204,9 +204,10 @@ def addUser(request):
     user.name = param['userParam']['name']
     user.gender = param['userParam']['gender']
     user.phone = param['userParam']['phone']
-    user.picture = 'http://127.0.0.1:8000/faces/%s%s.jpg' % (
-        param['userParam']['name'], param['userParam']['phone'][-4:])
     user.save()
+    with open(BASE_DIR + "/user.txt", "w") as f:
+        f.write(param['userParam']['name']+param['userParam']['phone'][-4:])
+        f.close()
     os.remove(BASE_DIR + "/name.txt")
     TTSThread('%s%s您好，欢迎光临，请问您要清咖啡还是浓咖啡呢?' %
               (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:])).start()

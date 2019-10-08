@@ -29,7 +29,6 @@ class User(models.Model):
     name = models.CharField(max_length=10, verbose_name='姓名')
     gender = models.CharField(max_length=2, verbose_name='性别')
     phone = models.CharField(max_length=11, verbose_name='手机号')
-    picture = models.CharField(max_length=100, verbose_name='照片')
 
     def __str__(self):
         return self.name+self.phone
