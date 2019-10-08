@@ -10,7 +10,7 @@ function RouterConfig({ history }) {
   return (
     <Router history={history}>
       <Switch>
-        <Route path="/" exact component={window.innerWidth > 1300 ? Follow : Order} /> 
+        <Route path="/" exact component={window.innerWidth > 1300 ? Follow : Order} />
         <Route path="/chart" exact component={Chart} />
         <Route path="/fllow" exact component={Follow} />
         <Route path="/table" exact component={MyTable} />

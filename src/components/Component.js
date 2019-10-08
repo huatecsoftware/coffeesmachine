@@ -179,7 +179,7 @@ const OrderShow = ({ lessCol, lessOrder }) => {
     />
 }
 
-const VoicePlot = ({ checked, camera }) => {
+const VoicePlot = ({ checked, camera, record }) => {
     return <div className={`${styles.voiceAnima} ${styles.flexRow}`} style={{ alignItems: "center", justifyContent: "center", display: checked ? "flex" : "none" }}>
         <Progress
             percent={100}
@@ -188,11 +188,11 @@ const VoicePlot = ({ checked, camera }) => {
             strokeWidth={410}
             style={{ display: camera ? 'block' : 'none' }}
         />
-        <div className={styles.circleBack}></div>
-        <div className={styles.circle}></div>
-        <div className={`${styles.circle} ${styles.circle1}`}></div>
-        <div className={`${styles.circle} ${styles.circle2}`}></div>
-        <div className={`${styles.circle} ${styles.circle3}`}></div>
+        <div className={styles.circleBack} ></div>
+        <div className={styles.circle} style={{ border: `4px dashed ${record ? 'orange' : 'black'}` }}></div>
+        <div className={`${styles.circle} ${styles.circle1}`} style={{ border: `4px dashed ${record ? 'orange' : 'black'}` }}></div>
+        <div className={`${styles.circle} ${styles.circle2}`} style={{ border: `4px dashed ${record ? 'orange' : 'black'}` }}></div>
+        <div className={`${styles.circle} ${styles.circle3}`} style={{ border: `4px dashed ${record ? 'orange' : 'black'}` }}></div>
     </div>
 }
 const ProgStep = ({ step }) => {

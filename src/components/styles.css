@@ -366,7 +366,6 @@ th, td {
     height: 40px;
     border-radius: 50%;
     position: absolute;
-    border: 3px dashed black;
     animation: loopScale 3s infinite ease-in-out
 }
 .circleBack{
@@ -378,15 +377,12 @@ th, td {
 }
 
 .circle1{
-    border: 3px dashed black;
     animation-delay: 0.5s
 }
 .circle2{
-    border: 3px dashed black;
     animation-delay: 1.5s
 }
 .circle3{
-    border: 3px dashed black;
     animation-delay: 2.5s
 }
 
