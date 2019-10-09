@@ -39,7 +39,7 @@ class Order extends React.Component {
 
 
     render() {
-        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal, photograph, checked, camera, record } = this.props.Index
+        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal, photograph, checked, camera, record,cameraPro } = this.props.Index
         return <div className={styles.main}>
             <Component.SuccessModal nextModal={nextModal} dispatch={this.dispatch} />
             <Component.RegistModal dispatch={this.dispatch} userParam={userParam} restFields={restFields} photograph={photograph} registModal={registModal} />
@@ -53,7 +53,7 @@ class Order extends React.Component {
                 </div>
                 <div className={`${styles.right} ${styles.flexCol}`}>
                     <Component.OrderShow lessCol={this.lessCol} lessOrder={lessOrder} />
-                    <Component.VoicePlot checked={checked} camera={camera} record={record} />
+                    <Component.VoicePlot checked={checked} camera={camera} record={record} cameraPro={cameraPro}/>
                 </div>
             </div>
         </div>

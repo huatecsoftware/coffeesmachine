@@ -153,6 +153,10 @@ label {
     padding: 0!important
 }
 
+:global(.ant-progress-bg) {
+    background: snow!important
+}
+
 :global(.ant-table-placeholder) {
     background: transparent!important;
 }
@@ -407,12 +411,12 @@ th, td {
 }
 
 .taste {
-    background-image: url(../assets/taste1.webp);
+    background-image: url(../assets/taste1.png);
     background-size: 100% 100%
 }
 
 .taste1 {
-    background-image: url(../assets/taste2.webp);
+    background-image: url(../assets/taste2.png);
     background-size: 100% 100%
 }
 
