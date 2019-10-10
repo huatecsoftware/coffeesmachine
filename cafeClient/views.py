@@ -142,6 +142,7 @@ def intelligenceModel(request):
         cmd = 'taskkill /pid ' + str(proid) + ' /f'
         try:
             os.system(cmd)
+            os.remove(BASE_DIR+'/result.txt')
             if os.path.exists(BASE_DIR+'/startRecord.txt'):
                 os.remove(BASE_DIR+'/startRecord.txt')
         except Exception as e:
@@ -209,8 +210,8 @@ def addUser(request):
         f.write(param['userParam']['name']+param['userParam']['phone'][-4:])
         f.close()
     os.remove(BASE_DIR + "/name.txt")
-    TTSThread('%s%s您好，欢迎光临，请问您要清咖啡还是浓咖啡呢?' %
-              (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:])).start()
+    TTS('%s%s您好,请问您要清咖啡还是浓咖啡呢?' %
+              (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:]))
     """     res = 'ok'
     else:
         res = 'err' """
