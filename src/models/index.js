@@ -12,6 +12,7 @@ export default {
     hints: [],
     range: [],
     orders: [],
+    result: '',
     cameraPro: 0,
     rangeStr: [],
     messages: [],
@@ -58,7 +59,7 @@ export default {
         features: response.data.res
       })
     },
-    *isNewUser({ person, camera, record }, { put, select }) {
+    *isNewUser({ person, camera, record, result }, { put, select }) {
       let pro = yield select(state => state.Index.cameraPro)
       const preCam = yield select(state => state.Index.camera)
       if (person === 'unknown') {
@@ -66,14 +67,16 @@ export default {
           type: 'saveRegistModal',
           visible: true,
           camera,
-          record
+          record,
+          result
         })
       } else {
         yield put({
           type: 'saveRegistModal',
           visible: false,
           camera,
-          record
+          record,
+          result
         })
       }
       if (camera === 'True') {
@@ -488,6 +491,7 @@ export default {
         registModal: action.visible,
         camera: action.camera,
         record: action.record,
+        result: action.result,
       }
     },
     saveSeries(state, action) {

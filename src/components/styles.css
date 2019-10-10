@@ -354,39 +354,79 @@ th, td {
 
 @keyframes loopScale {
     from {
-        width: 40px;
-        height: 40px;
-        opacity: 1;
-    }
-    to {
         width: 200px;
         height: 200px;
         opacity: 0.2;
     }
+    to {
+        width: 40px;
+        height: 40px;
+        opacity: 1;
+    }
 }
 
 .circle {
-    width: 40px;
-    height: 40px;
+    opacity: 0.2;
+    width: 200px;
+    height: 200px;
     border-radius: 50%;
     position: absolute;
     animation: loopScale 3s infinite ease-in-out
 }
-.circleBack{
+
+.mic {
     width: 40px;
     height: 40px;
     position: absolute;
-    background: url(../assets/mic.png);
+}
+
+.micOff{
+    background: url(../assets/micOff.png);
     background-size: 100% 100%
 }
 
-.circle1{
+.micOn{
+    background: url(../assets/micOn.png);
+    background-size: 100% 100%
+}
+
+.horn {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 0;
+    top: 25vh;
+}
+
+.hornClose {
+    background: url(../assets/close.png);
+    background-size: 100% 100%;
+}
+
+.hornPlay {
+    background: url(../assets/play.png);
+    background-size: 100% 100%;
+}
+
+.recogResult {
+    font-family: 'simsun';
+    position: absolute;
+    font-weight: bold;
+    color: black;
+    font-size: 2vw;
+    left: 40px;
+    top: 25vh;
+}
+
+.circle1 {
     animation-delay: 0.5s
 }
-.circle2{
+
+.circle2 {
     animation-delay: 1.5s
 }
-.circle3{
+
+.circle3 {
     animation-delay: 2.5s
 }
 

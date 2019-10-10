@@ -179,7 +179,7 @@ const OrderShow = ({ lessCol, lessOrder }) => {
     />
 }
 
-const VoicePlot = ({ checked, camera, record, cameraPro }) => {
+const VoicePlot = ({ checked, camera, record, cameraPro, result }) => {
     return <div className={`${styles.voiceAnima} ${styles.flexRow}`} style={{ alignItems: "center", justifyContent: "center", display: checked ? "flex" : "none" }}>
         <Progress
             percent={100}
@@ -188,8 +188,10 @@ const VoicePlot = ({ checked, camera, record, cameraPro }) => {
             successPercent={cameraPro}
             style={{ display: camera === 'True' ? 'block' : 'none' }}
         />
-        <div className={styles.circleBack} ></div>
-        <div className={styles.circle} style={{ border: `4px dashed ${record === 'True' ? 'orange' : 'black'}` }}></div>
+        <div className={`${styles.horn} ${result ? styles.hornPlay : styles.hornClose}`}></div>
+        <span className={styles.recogResult}>{result}</span>
+        <div className={`${styles.mic} ${record === 'True' ? styles.micOn : styles.micOff}`} ></div>
+        <div className={styles.circle} style={{ border: `4px dashed ${record === 'True' ? '#f4ea2a' : 'black'}` }}></div>
         <div className={`${styles.circle} ${styles.circle1}`} style={{ border: `4px dashed ${record === 'True' ? 'orange' : 'black'}` }}></div>
         <div className={`${styles.circle} ${styles.circle2}`} style={{ border: `4px dashed ${record === 'True' ? 'orange' : 'black'}` }}></div>
         <div className={`${styles.circle} ${styles.circle3}`} style={{ border: `4px dashed ${record === 'True' ? 'orange' : 'black'}` }}></div>
