@@ -19,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# siemens = SiemensS7Net(SiemensPLCS.S1200, '192.168.1.100')
+#siemens = SiemensS7Net(SiemensPLCS.S1200, '192.168.1.100')
 
 
 @csrf_exempt
@@ -151,9 +151,19 @@ def intelligenceModel(request):
 
 
 @csrf_exempt
-def calcFeature(request):
-    feature = loadKnowFace()
-    return JsonResponse({"res": feature})
+def AIState(request):
+    person = ''
+    result = ''
+    if os.path.exists(BASE_DIR + '/name.txt'):
+        with open(BASE_DIR+'/name.txt', "r") as f:
+            person = f.readline()
+
+    if os.path.exists(BASE_DIR + "/result.txt"):
+        with open(BASE_DIR + "/result.txt", "r") as f:
+            result = f.readline()
+            f.close()
+            os.remove(BASE_DIR +"/result.txt")
+    return JsonResponse({'person': person, 'result': result, 'record': str(os.path.exists(BASE_DIR+'/startRecord.txt')), 'camera': str(os.path.exists(BASE_DIR + "/loadCamera.txt"))})
 
 
 @csrf_exempt
@@ -169,6 +179,7 @@ def deleteTempFile(request):
     os.remove(BASE_DIR + "/name.txt")
     with open(BASE_DIR + "/toSleep.txt", 'w') as f:
         f.write('toSleep')
+        f.close()
     if os.path.exists(BASE_DIR + "/cameraP.txt"):
         with open(BASE_DIR + "/cameraP.txt", "r") as f:
             pid = f.readline()
@@ -211,7 +222,7 @@ def addUser(request):
         f.close()
     os.remove(BASE_DIR + "/name.txt")
     TTS('%s%s您好,请问您要清咖啡还是浓咖啡呢?' %
-              (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:]))
+        (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:]))
     """     res = 'ok'
     else:
         res = 'err' """
@@ -315,8 +326,8 @@ def loopDB(request):
                 file.write('时间:'+str(datetime.datetime.now())[:19]+'\n')
                 file.write('*****************************')
             if ing[0].Taste == '清咖啡':
-                """ start = 0
-                checkSigWrite(siemens, True)
+                start = 0
+                """ checkSigWrite(siemens, True)
                 tasteWrite(siemens, True, 1) """
             if ing[0].Taste == '浓咖啡':
                 start = 0
@@ -357,14 +368,14 @@ def loopDB(request):
 @csrf_exempt
 def PLCON(request):
     param = json.loads(request.body)
-    # siemens.WriteBool(param['addr'], 1)
+    #siemens.WriteBool(param['addr'], 1)
     return JsonResponse({'ok': 'ok'})
 
 
 @csrf_exempt
 def PLCOFF(request):
     param = json.loads(request.body)
-    # siemens.WriteBool(param['addr'], 0)
+    #siemens.WriteBool(param['addr'], 0)
     return JsonResponse({'ok': 'ok'})
 
 

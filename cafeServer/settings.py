@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': 'cafedb',
         'USER': 'root',
         'PASSWORD': '1234',
-        'HOST': '192.168.0.114',
+        'HOST': '192.168.0.106',
         'PORT': '3306',
         'TEST': {
                 'CHARSET': 'utf8',

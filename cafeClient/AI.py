@@ -158,6 +158,7 @@ def cameraProcess():
                     os.remove(BASE_DIR+'/cameraP.txt')
                 with open(BASE_DIR + "/toSleep.txt", "w") as f:
                     f.write('toSleep')
+                    f.close()
                 break
             # 根据人脸数计算每张脸的特征值
             face_encodings = face_recognition.face_encodings(
@@ -227,8 +228,8 @@ def recordProcess():
             with open(BASE_DIR+'/name.txt', 'r') as f:
                 user = f.readline()
                 f.close()
-                os.remove(BASE_DIR + "/name.txt")
                 if user != 'unknown':
+                    os.remove(BASE_DIR + "/name.txt")
                     speaking = True
                     play(BASE_DIR + "/wav/known/%s.wav" % user)
                     speaking = False
