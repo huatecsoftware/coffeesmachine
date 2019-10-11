@@ -18,7 +18,6 @@ export default {
     messages: [],
     orderIng: [],
     orderFin: [],
-    features: [],
     lessOrder: [],
     splineData: [],
     equipments: [],
@@ -52,13 +51,6 @@ export default {
         checked
       })
     },
-    *calcFeature({ _ }, { call, put }) {
-      const response = yield call(api.calcFeature)
-      yield put({
-        type: 'saveFeature',
-        features: response.data.res
-      })
-    },
     *isNewUser({ person, camera, record, result }, { put, select }) {
       let pro = yield select(state => state.Index.cameraPro)
       const preCam = yield select(state => state.Index.camera)
@@ -83,6 +75,44 @@ export default {
         yield put({
           type: 'saveCameraPro',
           pro: pro + Math.random() * 5
+        })
+      }
+      if (camera === 'False' && preCam === 'False') {
+        yield put({
+          type: 'saveCameraPro',
+          pro: 0
+        })
+      }
+    },
+    *isNewUser2({ _ }, { call, put, select }) {
+      const response=yield call(api.AIState)
+      const person=response.data.person
+      const camera=response.data.camera
+      const record=response.data.record
+      const result=response.data.result
+      let pro = yield select(state => state.Index.cameraPro)
+      const preCam = yield select(state => state.Index.camera)
+      if (person === 'unknown') {
+        yield put({
+          type: 'saveRegistModal',
+          visible: true,
+          camera,
+          record,
+          result
+        })
+      } else {
+        yield put({
+          type: 'saveRegistModal',
+          visible: false,
+          camera,
+          record,
+          result
+        })
+      }
+      if (camera === 'True') {
+        yield put({
+          type: 'saveCameraPro',
+          pro: pro + Math.random() * 10
         })
       }
       if (camera === 'False' && preCam === 'False') {
@@ -523,12 +553,6 @@ export default {
       return {
         ...state,
         userParam: action.userParam
-      }
-    },
-    saveFeature(state, action) {
-      return {
-        ...state,
-        features: action.features
       }
     },
     saveSwitch(state, action) {

@@ -4,11 +4,11 @@ import UserConfig from './UserConfig'
 import * as Component from './Component'
 import styles from '../components/styles.css'
 
-const aiSocket = new WebSocket('ws://127.0.0.1:8899/AI')
+/* const aiSocket = new WebSocket('ws://127.0.0.1:8899/AI')
 aiSocket.onopen = () => {
     aiSocket.send('start')
     console.log('数据发送中...')
-}
+} */
 
 class Order extends React.Component {
     constructor(props) {
@@ -24,7 +24,7 @@ class Order extends React.Component {
             })
         } */
         //setInterval(queryRcv, 1000)
-        aiSocket.onmessage = (res) => {
+        /* aiSocket.onmessage = (res) => {
             const data = JSON.parse(res.data)
             this.props.dispatch({
                 type: 'Index/isNewUser',
@@ -33,8 +33,13 @@ class Order extends React.Component {
                 record: data.record,
                 result: data.result,
             })
+        } */
+        const AI = () => {
+            this.dispatch({
+                type: 'Index/isNewUser2'
+            })
         }
-
+        setInterval(AI ,1000)
     }
 
 
