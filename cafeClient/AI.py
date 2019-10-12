@@ -36,6 +36,7 @@ cafeType = ''  # 咖啡种类
 onlyOnce = True  # 只读一次
 onlyOne = True  # 确保临时文件生成一次
 speaking = False  # 是否正在说话
+isCheck = False  # 是否验证过
 AIStatus = 'sleep'  # 默认睡眠状态
 cameraOpen = False  # 是否经过身份识别
 faceTime = time.time()  # 画面中出现人脸的时间
@@ -213,7 +214,7 @@ def recordProcess():
     录音进程
     """
     from cafeClient.models import User, modOrder
-    global checkStartTime, AIStatus, wakeTime, cafeType, checkStartStatus, speaking, onlyOnce
+    global checkStartTime, AIStatus, wakeTime, cafeType, checkStartStatus, speaking, onlyOnce, isCheck
     save_count = 0
     save_buffer = []
     # pyaudio对象，用来处理录音的音频流
@@ -275,12 +276,15 @@ def recordProcess():
                         order.save()
                 checkStartStatus = False
                 AIStatus = 'sleep'
+                isCheck = False
             if int(time.time()-wakeTime) == 15 and not os.path.exists(BASE_DIR+'/cameraP.txt'):
                 play(BASE_DIR+'/wav/const/超时.wav')
                 AIStatus = 'sleep'
+                isCheck = False
         if os.path.exists(BASE_DIR + "/toSleep.txt"):
             os.remove(BASE_DIR + "/toSleep.txt")
             AIStatus = 'sleep'
+            isCheck = False
         # 每次读取1500字节缓冲
         string_audio_data = stream.read(1500)
         # 将缓冲数据转换为ndarray
@@ -344,7 +348,7 @@ def STT(audioContent):
     阿里语音识别接口
     audioContent:音频字节流
     """
-    global AIStatus, checkStartTime, wakeTime, cafeType, checkStartStatus, cameraOpen, speaking
+    global AIStatus, checkStartTime, wakeTime, cafeType, checkStartStatus, cameraOpen, speaking, isCheck
     host = 'nls-gateway.cn-shanghai.aliyuncs.com'
     httpHeaders = {
         'X-NLS-Token': getToken('LTAI4ycWN34khiO2', 'TazGS3zeb5eeBc2ZEmBUGuCAVo1t9e'),
@@ -391,53 +395,57 @@ def STT(audioContent):
                     play(BASE_DIR+'/wav/const/取消订单.wav')
                     speaking = False
                     AIStatus = 'sleep'
+                    isCheck = False
                     wakeTime = time.time()
                     checkStartStatus = False
-                elif ('叫啥' in result or '名字' in result) and not checkStartStatus:
+                    if os.path.exists(BASE_DIR + "/user.txt"):
+                        os.remove(BASE_DIR+'/user.txt')
+                elif ('叫啥' in result or '名字' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     play(random.choice([BASE_DIR+'/wav/const/小花.wav', BASE_DIR +
                                         '/wav/const/名字.wav']))
                     speaking = False
                     wakeTime = time.time()
-                elif ('男的' in result or '女的' in result or '性别' in result) and not checkStartStatus:
+                elif ('男的' in result or '女的' in result or '性别' in result) and not checkStartStatus and isCheck:
                     answer = random.choice([BASE_DIR +
                                             '/wav/const/女孩.wav', BASE_DIR+'/wav/const/我是.wav'])
                     speaking = True
                     play(answer)
                     speaking = False
                     wakeTime = time.time()
-                elif ('什么' in result or '干啥' in result or '做啥' in result) and not checkStartStatus:
+                elif ('什么' in result or '干啥' in result or '做啥' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/能做咖啡哦.wav')
                     speaking = False
                     wakeTime = time.time()
-                elif ('再见' in result or '拜拜' in result) and not checkStartStatus:
+                elif ('再见' in result or '拜拜' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/byebye.wav')
                     speaking = False
                     AIStatus = 'sleep'
-                elif ('几点' in result) and not checkStartStatus:
+                    isCheck = False
+                elif ('几点' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     dt = datetime.datetime.now()
                     TTS('现在是北京时间:%s年%s月%s号%s点%s分%s秒' % (dt.year, dt.month, dt.day, dt.hour,
                                                         dt.minute, dt.second), BASE_DIR + "/wav/const/time.wav")
                     wakeTime = time.time()
                     speaking = False
-                elif ('周几' in result or '星期' in result) and not checkStartStatus:
+                elif ('周几' in result or '星期' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     dt = datetime.datetime.now()
                     TTS('今天是:周%s哦,' % (dt.weekday()+1 if dt.weekday()+1 != 7 else '日'), BASE_DIR +
                         "/wav/const/time.wav")
                     wakeTime = time.time()
                     speaking = False
-                elif ('几号' in result) and not checkStartStatus:
+                elif ('几号' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     dt = datetime.datetime.now()
                     TTS('今天是:%s年%s月%s号哦' % (dt.year, dt.month,
                                             dt.day), BASE_DIR + "/wav/const/time.wav")
                     wakeTime = time.time()
                     speaking = False
-                elif ('天气' in result or '少度' in result or '几度' in result or '温度' in result) and not checkStartStatus:
+                elif ('天气' in result or '少度' in result or '几度' in result or '温度' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     city = requests.get('http://pv.sohu.com/cityjson').text
                     cname = city[city.index('cname')+9:-7]
@@ -448,18 +456,18 @@ def STT(audioContent):
                                                           res['humidity'], res['winddirection'], res['windpower']), BASE_DIR+'/wav/const/天气.wav')
                     wakeTime = time.time()
                     speaking = False
-                elif ('几岁' in result or '多大' in result) and not checkStartStatus:
+                elif ('几岁' in result or '多大' in result) and not checkStartStatus and isCheck:
                     speaking = True
                     play(random.choice([BASE_DIR+'/wav/const/18岁.wav', BASE_DIR +
                                         '/wav/const/没礼貌.wav', BASE_DIR+'/wav/const/年龄.wav']))
                     speaking = False
                     wakeTime = time.time()
-                elif '傻' in result and not checkStartStatus:
+                elif '傻' in result and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/傻.wav')
                     speaking = False
                     wakeTime = time.time()
-                elif (('清咖' in result) or ('轻咖' in result) or ('新咖' in result) or ('听咖' in result) or ('情咖' in result) or ('星咖' in result)) and cameraOpen and not checkStartStatus:
+                elif (('清咖' in result) or ('轻咖' in result) or ('新咖' in result) or ('听咖' in result) or ('情咖' in result) or ('星咖' in result)) and cameraOpen and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/清咖啡.wav')
                     speaking = False
@@ -468,7 +476,7 @@ def STT(audioContent):
                     checkStartTime = time.time()
                     wakeTime = time.time()
                     cafeType = '清咖啡'
-                elif (('浓咖' in result) or ('农咖' in result) or ('能咖' in result) or ('侬咖' in result)) and cameraOpen and not checkStartStatus:
+                elif (('浓咖' in result) or ('农咖' in result) or ('能咖' in result) or ('侬咖' in result)) and cameraOpen and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/浓咖啡.wav')
                     speaking = False
@@ -477,18 +485,20 @@ def STT(audioContent):
                     checkStartTime = time.time()
                     wakeTime = time.time()
                     cafeType = '浓咖啡'
-                elif '咖啡' == result and not checkStartStatus:
+                elif '咖啡' in result and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/没听清.wav')
                     speaking = False
                     wakeTime = time.time()
-                elif ('不要' == result or '不喝' == result or '我喝' == result or '呵呵' == result or '薄荷' == result or '如何' == result or '符合' == result) and not checkStartStatus:
+                elif ('不要' == result or '不喝' == result or '我喝' == result or '呵呵' == result or '薄荷' == result or '如何' == result or '符合' == result) and not checkStartStatus and not isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/讨厌.wav')
                     speaking = False
                     AIStatus = 'sleep'
+                    isCheck = False
                     wakeTime = time.time()
-                elif ('要' in result or '呵' in result or '对' in result or '喝' in result or '哥' in result or '和' in result or '是' in result or '杯' in result or '咖' in result or '啡' in result) and not checkStartStatus:
+                elif ('要' in result or '呵' in result or '对' in result or '喝' in result or '哥' in result or '和' in result or '是' in result or '杯' in result or '咖' in result or '啡' in result) and not checkStartStatus and not isCheck:
+                    isCheck = True
                     speaking = True
                     play(BASE_DIR+'/wav/const/身份验证.wav')
                     cameraP = Process(target=cameraProcess)
@@ -500,30 +510,35 @@ def STT(audioContent):
                     with open(BASE_DIR + "/loadCamera.txt", "w") as f:
                         f.write('loadCamera')
                     wakeTime = time.time()-15
-                elif '瞅' in result and not checkStartStatus:
+                elif '瞅' in result and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/瞅你.wav')
                     speaking = False
                     wakeTime = time.time()
-                elif ('你好' == result or '您好' == result) and not checkStartStatus:
+                elif ('你好' == result or '您好' == result) and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/你好.wav')
                     speaking = False
                     wakeTime = time.time()
-                elif '好听' in result and not checkStartStatus:
+                elif '好听' in result and not checkStartStatus and isCheck:
                     speaking = True
                     play(BASE_DIR+'/wav/const/开心.wav')
                     speaking = False
                     wakeTime = time.time()
-                elif len(result) > 1 and '花' not in result and '华' not in result and not checkStartStatus:
-                    res = requests.get(
+                elif len(result) > 1 and '花' not in result and '华' not in result and not checkStartStatus and isCheck:
+                    """ res = requests.get(
                         "http://www.baidu.com/s", params={'wd': result})
                     soup = BeautifulSoup(res.text, 'lxml')
                     target = list(filter(lambda obj: '是' in str(
                         obj.parent), soup.find_all('em')))
                     TTS(''.join(re.compile(
                         '>(.*?)<').findall(str(target[0].parent))), BASE_DIR + "/wav/const/听不懂.wav")
-                    wakeTime = time.time()
+                    wakeTime = time.time() """
+                    speaking = True
+                    play(BASE_DIR+'/wav/const/主动再见.wav')
+                    speaking = False
+                    AIStatus = 'sleep'
+                    isCheck = False
                 else:
                     pass
         else:
@@ -532,4 +547,4 @@ def STT(audioContent):
         print('The response is not json format string')
     conn.close()
 
-# TTS("<speak>悄悄的告诉你，其实我是<break/>才不告诉你呢，被骗了吧，啦啦啦</speak>", BASE_DIR+'/wav/const/测试.wav')
+#TTS("小花不能回答这个问题，再见", BASE_DIR+'/wav/const/主动再见.wav')
