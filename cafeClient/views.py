@@ -4,6 +4,7 @@ import os
 import json
 import time
 import random
+import base64
 import datetime
 import numpy as np
 from cafeClient.AI import *
@@ -142,9 +143,11 @@ def intelligenceModel(request):
         cmd = 'taskkill /pid ' + str(proid) + ' /f'
         try:
             os.system(cmd)
-            os.remove(BASE_DIR+'/result.txt')
             if os.path.exists(BASE_DIR+'/startRecord.txt'):
                 os.remove(BASE_DIR+'/startRecord.txt')
+            os.remove(BASE_DIR +"/name.txt")
+            os.remove(BASE_DIR +"/user.txt")
+            os.remove(BASE_DIR +"/unknown.txt")
         except Exception as e:
             print(e)
     return JsonResponse({'ok': 'ok'})
@@ -153,17 +156,10 @@ def intelligenceModel(request):
 @csrf_exempt
 def AIState(request):
     person = ''
-    result = ''
-    if os.path.exists(BASE_DIR + '/name.txt'):
-        with open(BASE_DIR+'/name.txt', "r") as f:
+    if os.path.exists(BASE_DIR + '/user.txt') and os.path.exists(BASE_DIR+'/unknown.txt'):
+        with open(BASE_DIR+'/user.txt', "r") as f:
             person = f.readline()
-
-    if os.path.exists(BASE_DIR + "/result.txt"):
-        with open(BASE_DIR + "/result.txt", "r") as f:
-            result = f.readline()
-            f.close()
-            os.remove(BASE_DIR +"/result.txt")
-    return JsonResponse({'person': person, 'result': result, 'record': str(os.path.exists(BASE_DIR+'/startRecord.txt')), 'camera': str(os.path.exists(BASE_DIR + "/loadCamera.txt"))})
+    return JsonResponse({'person': person, 'record': os.path.exists(BASE_DIR+'/startRecord.txt')})
 
 
 @csrf_exempt
@@ -174,22 +170,9 @@ def deleteTempFile(request):
     global newPic
     try:
         os.remove(BASE_DIR+'/faces/%s' % newPic)
+        os.remove(BASE_DIR + '/user.txt')
     except:
         pass
-    os.remove(BASE_DIR + "/name.txt")
-    with open(BASE_DIR + "/toSleep.txt", 'w') as f:
-        f.write('toSleep')
-        f.close()
-    if os.path.exists(BASE_DIR + "/cameraP.txt"):
-        with open(BASE_DIR + "/cameraP.txt", "r") as f:
-            pid = f.readline()
-            f.close()
-            os.remove(BASE_DIR + "/cameraP.txt")
-            cmd = 'taskkill /pid ' + pid + ' /f'
-            try:
-                os.system(cmd)
-            except Exception as e:
-                print(e)
     return JsonResponse({'res': 'ok'})
 
 
@@ -198,16 +181,6 @@ def addUser(request):
     """ 
         用户注册函数
     """
-    if os.path.exists(BASE_DIR + "/cameraP.txt"):
-        with open(BASE_DIR + "/cameraP.txt", "r") as f:
-            pid = f.readline()
-            f.close()
-            os.remove(BASE_DIR + "/cameraP.txt")
-            cmd = 'taskkill /pid ' + pid + ' /f'
-            try:
-                os.system(cmd)
-            except Exception as e:
-                print(e)
     param = json.loads(request.body)
     res = 'ok'
     userNums = User.objects.filter(Q(phone=param['userParam']['phone']))
@@ -220,12 +193,14 @@ def addUser(request):
     with open(BASE_DIR + "/user.txt", "w") as f:
         f.write(param['userParam']['name']+param['userParam']['phone'][-4:])
         f.close()
-    os.remove(BASE_DIR + "/name.txt")
-    TTS('%s%s您好,请问您要清咖啡还是浓咖啡呢?' %
+    TTS('%s%s您好,欢迎光临，请问您是要喝咖啡吗?' %
         (param['userParam']['name'], param['userParam']['gender']), BASE_DIR + "/wav/known/%s%s.wav" % (param['userParam']['name'], param['userParam']['phone'][-4:]))
     """     res = 'ok'
     else:
         res = 'err' """
+    os.remove(BASE_DIR+'/unknown.txt')
+    with open(BASE_DIR +"/register.txt", "w") as f:
+        f.write('register')
     return JsonResponse({'ok': res})
 
 
@@ -239,10 +214,29 @@ def photograph(request):
     """
     global newPic
     param = json.loads(request.body)
-    newPic = '%s%s.jpg' % (param["name"], param["phone"][-4:])
-    with open(BASE_DIR + "/person.txt", "w") as f:
-        f.write('%s%s' % (param["name"], param["phone"][-4:]))
+    newPic = '%s%s.png' % (param["name"], param["phone"][-4:])
+    imgdata = base64.b64decode(param['data'][22:])
+    file = open(BASE_DIR+'/faces/'+newPic, 'wb')
+    file.write(imgdata)
+    file.close()
     return JsonResponse({'ok': 'ok'})
+
+
+@csrf_exempt
+def calcFaceEncoding(request):
+    condings = loadKnowFace()
+    return JsonResponse({'condings': condings})
+
+
+@csrf_exempt
+def savePerson(request):
+    param = json.loads(request.body)
+    person = param['person']
+    with open(BASE_DIR + "/name.txt", "w") as f:
+        f.write(person)
+    with open(BASE_DIR + "/user.txt", "w") as f:
+        f.write(person)
+    return JsonResponse({'res': 'ok'})
 
 
 @csrf_exempt

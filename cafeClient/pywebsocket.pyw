@@ -84,24 +84,6 @@ async def PLCServer(websocket, path):
             await websocket.send(json.dumps({'repos': [0, 0, 0, 0, 0], 'aError': 0, 'bError': 0, 'coverLess': 0, 'cupLess': 0, 'cafe1Material': 0, 'cafe2Material': 0, 'robotErr': 0, 'cafe1Rubbish': 0, 'cafe2Rubbish': 0, 'cupNo': 0, 'coverNo': 0, 'tagErr': 0, 'guangMu': 0, 'equipment': equipments, 'cafeFin': 0, 'm130': 0, 'm131': 0, 'cafe1Fin': 0, 'cafe2Fin': 0}))
 
 
-async def AI(websocket, path):
-    async for message in websocket:
-        while True:
-            person = ''
-            result = ''
-            await asyncio.sleep(0.5)
-            if os.path.exists(BASE_DIR + '/name.txt'):
-                with open(BASE_DIR+'/name.txt', "r") as f:
-                    person = f.readline()
-
-            if os.path.exists(BASE_DIR + "/result.txt"):
-                with open(BASE_DIR + "/result.txt", "r") as f:
-                    result = f.readline()
-            await websocket.send(json.dumps({'person': person, 'result': result, 'record': str(os.path.exists(BASE_DIR+'/startRecord.txt')), 'camera': str(os.path.exists(BASE_DIR + "/loadCamera.txt"))}))
-
-
 start_server = websockets.serve(PLCServer, '127.0.0.1', 8765)
 asyncio.get_event_loop().run_until_complete(start_server)
-ai_server = websockets.serve(AI, '127.0.0.1', 8899)
-asyncio.get_event_loop().run_until_complete(ai_server)
 asyncio.get_event_loop().run_forever()
