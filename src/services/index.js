@@ -1,13 +1,13 @@
-import {  requestPOST } from '../utils/request'
+import { requestPOST } from '../utils/request'
 
 const host = window.location.hostname
 const port = '8888'
 
 export function queryOrder(param) {
-  return requestPOST(`http://${host}:${port}/queryAllOrder/`,param)
+  return requestPOST(`http://${host}:${port}/queryAllOrder/`, param)
 }
 export function rangeClick(param) {
-  return requestPOST(`http://${host}:${port}/rangeClick/`,param)
+  return requestPOST(`http://${host}:${port}/rangeClick/`, param)
 }
 export function addOrder(param) {
   return requestPOST(`http://${host}:${port}/addOrder/`, param)
@@ -46,8 +46,14 @@ export function deleteTempFile(param) {
   return requestPOST(`http://${host}:${port}/deleteTempFile/`, param)
 }
 export function photograph(param) {
-  return requestPOST(`http://${host}:${port}/photograph/`, param)
+  return requestPOST(`http://192.168.0.106:${port}/photograph/`, param)
 }
 export function AIState(param) {
   return requestPOST(`http://${host}:${port}/AIState/`, param)
+}
+export function calcFaceEncoding(param) {
+  return requestPOST(`http://192.168.0.106:${port}/calcFaceEncoding/`, param)
+}
+export function savePerson(param) {
+  return requestPOST(`http://${host}:${port}/savePerson/`, param)
 }

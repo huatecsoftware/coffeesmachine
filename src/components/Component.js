@@ -1,7 +1,7 @@
 import styles from './styles.css'
 import Register from './Register'
 import * as utils from '../utils/utils'
-import { Breadcrumb, Icon, Modal, Row, Button, Table, Steps, Result, Divider, Progress } from 'antd'
+import { Breadcrumb, Icon, Modal, Row, Button, Table, Steps, Result, Divider } from 'antd'
 
 const { Step } = Steps
 
@@ -179,22 +179,13 @@ const OrderShow = ({ lessCol, lessOrder }) => {
     />
 }
 
-const VoicePlot = ({ checked, camera, record, cameraPro, result }) => {
+const VoicePlot = ({ checked, record }) => {
     return <div className={`${styles.voiceAnima} ${styles.flexRow}`} style={{ alignItems: "center", justifyContent: "center", display: checked ? "flex" : "none" }}>
-        <Progress
-            percent={100}
-            showInfo={false}
-            strokeWidth={410}
-            successPercent={cameraPro}
-            style={{ display: camera === 'True' ? 'block' : 'none' }}
-        />
-        <div className={`${styles.horn} ${result ? styles.hornPlay : styles.hornClose}`}></div>
-        <span className={styles.recogResult}>{result}</span>
-        <div className={`${styles.mic} ${record === 'True' ? styles.micOn : styles.micOff}`} ></div>
-        <div className={styles.circle} style={{ border: `4px dashed ${record === 'True' ? '#f4ea2a' : 'black'}` }}></div>
-        <div className={`${styles.circle} ${styles.circle1}`} style={{ border: `4px dashed ${record === 'True' ? 'orange' : 'black'}` }}></div>
-        <div className={`${styles.circle} ${styles.circle2}`} style={{ border: `4px dashed ${record === 'True' ? 'orange' : 'black'}` }}></div>
-        <div className={`${styles.circle} ${styles.circle3}`} style={{ border: `4px dashed ${record === 'True' ? 'orange' : 'black'}` }}></div>
+        <div className={`${styles.mic} ${record ? styles.micOn : styles.micOff}`} ></div>
+        <div className={styles.circle} style={{ border: `4px dashed ${record ? '#f4ea2a' : 'black'}` }}></div>
+        <div className={`${styles.circle} ${styles.circle1}`} style={{ border: `4px dashed ${record ? 'orange' : 'black'}` }}></div>
+        <div className={`${styles.circle} ${styles.circle2}`} style={{ border: `4px dashed ${record ? 'orange' : 'black'}` }}></div>
+        <div className={`${styles.circle} ${styles.circle3}`} style={{ border: `4px dashed ${record ? 'orange' : 'black'}` }}></div>
     </div>
 }
 const ProgStep = ({ step }) => {

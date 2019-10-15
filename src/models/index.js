@@ -12,18 +12,17 @@ export default {
     hints: [],
     range: [],
     orders: [],
-    result: '',
-    cameraPro: 0,
     rangeStr: [],
     messages: [],
     orderIng: [],
     orderFin: [],
+    features: [],
+    record: false,
     lessOrder: [],
     splineData: [],
     equipments: [],
     checked: false,
-    camera: 'False',
-    record: 'False',
+    personRes: false,
     nextModal: false,
     checkModal: false,
     restFields: false,
@@ -50,75 +49,42 @@ export default {
         type: 'saveSwitch',
         checked
       })
+      if (checked) {
+        yield put({
+          type: 'savePersonRes',
+          personRes: true
+        })
+      }
     },
-    *isNewUser({ person, camera, record, result }, { put, select }) {
-      let pro = yield select(state => state.Index.cameraPro)
-      const preCam = yield select(state => state.Index.camera)
+    *calcFaceEncoding({ _ }, { call, put }) {
+      const response = yield call(api.calcFaceEncoding)
+      yield put({
+        type: 'saveFaceConding',
+        features: response.data.condings
+      })
+    },
+    *savePerson({ person }, { call, put }) {
+      yield put({
+        type: 'savePersonRes',
+        personRes: false
+      })
+      yield call(api.savePerson, { person })
+    },
+    *isNewUser2({ _ }, { call, put }) {
+      const response = yield call(api.AIState)
+      const person = response.data.person
+      const record = response.data.record
       if (person === 'unknown') {
         yield put({
           type: 'saveRegistModal',
           visible: true,
-          camera,
           record,
-          result
         })
       } else {
         yield put({
           type: 'saveRegistModal',
           visible: false,
-          camera,
           record,
-          result
-        })
-      }
-      if (camera === 'True') {
-        yield put({
-          type: 'saveCameraPro',
-          pro: pro + Math.random() * 5
-        })
-      }
-      if (camera === 'False' && preCam === 'False') {
-        yield put({
-          type: 'saveCameraPro',
-          pro: 0
-        })
-      }
-    },
-    *isNewUser2({ _ }, { call, put, select }) {
-      const response=yield call(api.AIState)
-      const person=response.data.person
-      const camera=response.data.camera
-      const record=response.data.record
-      const result=response.data.result
-      let pro = yield select(state => state.Index.cameraPro)
-      const preCam = yield select(state => state.Index.camera)
-      if (person === 'unknown') {
-        yield put({
-          type: 'saveRegistModal',
-          visible: true,
-          camera,
-          record,
-          result
-        })
-      } else {
-        yield put({
-          type: 'saveRegistModal',
-          visible: false,
-          camera,
-          record,
-          result
-        })
-      }
-      if (camera === 'True') {
-        yield put({
-          type: 'saveCameraPro',
-          pro: pro + Math.random() * 10
-        })
-      }
-      if (camera === 'False' && preCam === 'False') {
-        yield put({
-          type: 'saveCameraPro',
-          pro: 0
         })
       }
     },
@@ -138,8 +104,8 @@ export default {
         userParam
       })
     },
-    * photograph({ userParam }, { call, put }) {
-      const response = yield call(api.photograph, { ...userParam })
+    * photograph({ userParam, data }, { call, put }) {
+      const response = yield call(api.photograph, { ...userParam, data })
       if (response.data.ok === 'ok') {
         message.info('拍照成功')
         yield put({
@@ -152,6 +118,11 @@ export default {
       const userParam = yield select(state => state.Index.userParam)
       const response = yield call(api.addUser, { userParam })
       if (response.data.ok === 'ok') {
+        const response = yield call(api.calcFaceEncoding)
+        yield put({
+          type: 'saveFaceConding',
+          features: response.data.condings
+        })
         yield put({
           type: 'saveFields',
           restFields: true,
@@ -492,7 +463,8 @@ export default {
         ...state,
         restFields: action.restFields,
         params: action.params,
-        userParam: action.params
+        userParam: action.params,
+        registModal: false,
       }
     },
     saveSocketEquipment(state, action) {
@@ -519,9 +491,7 @@ export default {
       return {
         ...state,
         registModal: action.visible,
-        camera: action.camera,
         record: action.record,
-        result: action.result,
       }
     },
     saveSeries(state, action) {
@@ -535,12 +505,6 @@ export default {
       return {
         ...state,
         range: action.e,
-      }
-    },
-    saveCameraPro(state, action) {
-      return {
-        ...state,
-        cameraPro: action.pro,
       }
     },
     saveStep(state, action) {
@@ -559,6 +523,18 @@ export default {
       return {
         ...state,
         checked: action.checked
+      }
+    },
+    saveFaceConding(state, action) {
+      return {
+        ...state,
+        features: action.features
+      }
+    },
+    savePersonRes(state, action) {
+      return {
+        ...state,
+        personRes: action.personRes
       }
     },
     saveOrderState(state, action) {

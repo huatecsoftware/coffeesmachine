@@ -3,6 +3,7 @@ import styles from './styles.css'
 import { Form, Input, Button, Radio, message, Row } from 'antd'
 
 const RadioGroup = Radio.Group
+const faceapi = require('face-api.js')
 
 class RegistrationForm extends React.Component {
 
@@ -20,7 +21,7 @@ class RegistrationForm extends React.Component {
                     this.dispatch({
                         type: 'Index/saveUser'
                     })
-                }else{
+                } else {
                     message.warning('您还没有拍照')
                 }
             }
@@ -39,8 +40,14 @@ class RegistrationForm extends React.Component {
         if (userParam.name === '' || userParam.phone === '') {
             message.warning('请先输入姓名和手机号')
         } else {
+            const video = window.document.getElementById("inputVideo")
+            const canvas = window.document.getElementById('canvas')
+            faceapi.matchDimensions(canvas, video, true)
+            const context = canvas.getContext('2d')
+            context.drawImage(video, 0, 0, 320, 240);
             this.dispatch({
                 type: 'Index/photograph',
+                data: canvas.toDataURL(),
                 userParam
             })
         }

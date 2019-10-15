@@ -1,14 +1,10 @@
 import React from 'react'
+import Face from './Face'
 import { connect } from 'dva'
 import UserConfig from './UserConfig'
 import * as Component from './Component'
 import styles from '../components/styles.css'
 
-/* const aiSocket = new WebSocket('ws://127.0.0.1:8899/AI')
-aiSocket.onopen = () => {
-    aiSocket.send('start')
-    console.log('数据发送中...')
-} */
 
 class Order extends React.Component {
     constructor(props) {
@@ -24,28 +20,19 @@ class Order extends React.Component {
             })
         } */
         //setInterval(queryRcv, 1000)
-        /* aiSocket.onmessage = (res) => {
-            const data = JSON.parse(res.data)
-            this.props.dispatch({
-                type: 'Index/isNewUser',
-                person: data.person,
-                camera: data.camera,
-                record: data.record,
-                result: data.result,
-            })
-        } */
         const AI = () => {
             this.dispatch({
                 type: 'Index/isNewUser2'
             })
         }
-        setInterval(AI ,1000)
+        AI()
+        setInterval(AI, 10000)
     }
 
 
 
     render() {
-        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal, photograph, checked, camera, record, cameraPro, result } = this.props.Index
+        const { params, checkModal, lessOrder, nextModal, restFields, step, userParam, registModal, photograph, checked, record } = this.props.Index
         return <div className={styles.main}>
             <Component.SuccessModal nextModal={nextModal} dispatch={this.dispatch} />
             <Component.RegistModal dispatch={this.dispatch} userParam={userParam} restFields={restFields} photograph={photograph} registModal={registModal} />
@@ -59,7 +46,8 @@ class Order extends React.Component {
                 </div>
                 <div className={`${styles.right} ${styles.flexCol}`}>
                     <Component.OrderShow lessCol={this.lessCol} lessOrder={lessOrder} />
-                    <Component.VoicePlot checked={checked} camera={camera} record={record} cameraPro={cameraPro} result={result} />
+                    <Face/>
+                    <Component.VoicePlot checked={checked} record={record}/>
                 </div>
             </div>
         </div>
