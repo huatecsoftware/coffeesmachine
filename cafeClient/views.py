@@ -145,7 +145,6 @@ def intelligenceModel(request):
             os.system(cmd)
             if os.path.exists(BASE_DIR+'/startRecord.txt'):
                 os.remove(BASE_DIR+'/startRecord.txt')
-            os.remove(BASE_DIR +"/name.txt")
             os.remove(BASE_DIR +"/user.txt")
             os.remove(BASE_DIR +"/unknown.txt")
         except Exception as e:

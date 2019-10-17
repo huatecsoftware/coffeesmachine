@@ -234,11 +234,10 @@ def recordProcess():
         if AIStatus == 'wake':
             if int(time.time()-checkStartTime) == 10 and checkStartStatus:
                 play(BASE_DIR+'/wav/const/等待制作.wav')
-                if os.path.exists(BASE_DIR + "/user.txt"):
+                if os.path.exists(BASE_DIR + "/user.txt") and cafeType != '':
                     with open(BASE_DIR + "/user.txt", "r") as f:
                         userInfo = f.readline()
                         f.close()
-                        os.remove(BASE_DIR + "/user.txt")
                         name = userInfo[:-4]
                         phone = userInfo[-4:]
                         user = User.objects.get(
@@ -255,6 +254,7 @@ def recordProcess():
                         order.save()
                 checkStartStatus = False
                 AIStatus = 'sleep'
+                wakeTime = time.time()
             if int(time.time()-wakeTime) == 15:
                 play(BASE_DIR+'/wav/const/超时.wav')
                 AIStatus = 'sleep'
@@ -337,11 +337,16 @@ def STT(audioContent):
         status = body['status']
         if status == 20000000:
             result = body['result']
-            print(result, AIStatus)
             # 识别成功后续逻辑
             if ('花' in result) or ('华' in result):
                 speaking = True
                 play(BASE_DIR+'/wav/const/唤醒.wav')
+                speaking = False
+                AIStatus = 'wake'
+                wakeTime = time.time()
+            if '你好' == result or '您好' == result:
+                speaking = True
+                play(BASE_DIR+'/wav/const/你好.wav')
                 speaking = False
                 AIStatus = 'wake'
                 wakeTime = time.time()
@@ -353,8 +358,7 @@ def STT(audioContent):
                     AIStatus = 'sleep'
                     wakeTime = time.time()
                     checkStartStatus = False
-                    if os.path.exists(BASE_DIR + "/user.txt"):
-                        os.remove(BASE_DIR+'/user.txt')
+                    cafeType = ''
                 elif ('叫啥' in result or '名字' in result) and not checkStartStatus:
                     speaking = True
                     play(random.choice([BASE_DIR+'/wav/const/小花.wav', BASE_DIR +
@@ -457,11 +461,6 @@ def STT(audioContent):
                     play(BASE_DIR+'/wav/const/瞅你.wav')
                     speaking = False
                     wakeTime = time.time()
-                elif ('你好' == result or '您好' == result) and not checkStartStatus:
-                    speaking = True
-                    play(BASE_DIR+'/wav/const/你好.wav')
-                    speaking = False
-                    wakeTime = time.time()
                 elif '不要' in result and not checkStartStatus:
                     speaking = True
                     play(BASE_DIR+'/wav/const/都不要.wav')
@@ -472,6 +471,8 @@ def STT(audioContent):
                     play(BASE_DIR+'/wav/const/开心.wav')
                     speaking = False
                     wakeTime = time.time()
+                elif ('确认' in result or '确定' in result) and checkStartStatus:
+                    checkStartTime = time.time()-9
                 elif len(result) > 1 and '花' not in result and '华' not in result and not checkStartStatus:
                     """ res = requests.get(
                         "http://www.baidu.com/s", params={'wd': result})
