@@ -22,11 +22,10 @@ class Order extends React.Component {
         //setInterval(queryRcv, 1000)
         const AI = () => {
             this.dispatch({
-                type: 'Index/isNewUser2'
+                type: 'Index/isNewUser'
             })
         }
-        AI()
-        setInterval(AI, 10000)
+        setInterval(AI, 1000)
     }
 
 

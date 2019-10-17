@@ -70,7 +70,7 @@ export default {
       })
       yield call(api.savePerson, { person })
     },
-    *isNewUser2({ _ }, { call, put }) {
+    *isNewUser({ _ }, { call, put }) {
       const response = yield call(api.AIState)
       const person = response.data.person
       const record = response.data.record
@@ -123,18 +123,18 @@ export default {
           type: 'saveFaceConding',
           features: response.data.condings
         })
-        yield put({
-          type: 'saveFields',
-          restFields: true,
-          params: { name: '', phone: '', gender: '', taste: '' },
-        })
-        yield put({
-          type: 'savePhotograph',
-          photograph: false
-        })
       } else {
         message.warning('您已注册过，请不要重复注册')
       }
+      yield put({
+        type: 'saveFields',
+        restFields: true,
+        params: { name: '', phone: '', gender: '', taste: '' },
+      })
+      yield put({
+        type: 'savePhotograph',
+        photograph: false
+      })
     },
     * rangeClick({ _ }, { call, put, select }) {
       const range = yield select(state => state.Index.range)

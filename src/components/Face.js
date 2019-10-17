@@ -72,8 +72,8 @@ class Face extends React.Component {
 
     render() {
         return <div style={{ zIndex: 999, position: 'absolute' }}>
-            <video style={{ width: 320, height: 240 }} id="inputVideo" autoPlay muted playsInline></video>
-            <canvas id='canvas' style={{ width: 320, height: 240, position: 'absolute', left: 0 }}></canvas>
+            <video style={{ width: 320}} id="inputVideo" autoPlay muted playsInline></video>
+            <canvas id='canvas' style={{ width: 320, position: 'absolute', left: 0 }}></canvas>
         </div>
 
     }

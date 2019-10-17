@@ -46,13 +46,13 @@ export function deleteTempFile(param) {
   return requestPOST(`http://${host}:${port}/deleteTempFile/`, param)
 }
 export function photograph(param) {
-  return requestPOST(`http://192.168.0.106:${port}/photograph/`, param)
+  return requestPOST(`http://${host}:${port}/photograph/`, param)
 }
 export function AIState(param) {
   return requestPOST(`http://${host}:${port}/AIState/`, param)
 }
 export function calcFaceEncoding(param) {
-  return requestPOST(`http://192.168.0.106:${port}/calcFaceEncoding/`, param)
+  return requestPOST(`http://${host}:${port}/calcFaceEncoding/`, param)
 }
 export function savePerson(param) {
   return requestPOST(`http://${host}:${port}/savePerson/`, param)
