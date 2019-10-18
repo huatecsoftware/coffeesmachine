@@ -20,7 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-#siemens = SiemensS7Net(SiemensPLCS.S1200, '192.168.1.100')
+# siemens = SiemensS7Net(SiemensPLCS.S1200, '192.168.1.100')
 
 
 @csrf_exempt
@@ -130,7 +130,7 @@ proid = ''
 
 @csrf_exempt
 def intelligenceModel(request):
-    """  
+    """
         智能模式开启语音和视频进程
     """
     global proid
@@ -143,12 +143,16 @@ def intelligenceModel(request):
         cmd = 'taskkill /pid ' + str(proid) + ' /f'
         try:
             os.system(cmd)
-            if os.path.exists(BASE_DIR+'/startRecord.txt'):
-                os.remove(BASE_DIR+'/startRecord.txt')
-            os.remove(BASE_DIR +"/user.txt")
-            os.remove(BASE_DIR +"/unknown.txt")
-        except Exception as e:
-            print(e)
+        except:
+            pass
+        if os.path.exists(BASE_DIR+'/startRecord.txt'):
+            os.remove(BASE_DIR+'/startRecord.txt')
+        if os.path.exists(BASE_DIR+'/name.txt'):
+            os.remove(BASE_DIR+'/name.txt')
+        if os.path.exists(BASE_DIR+'/user.txt'):
+            os.remove(BASE_DIR + "/user.txt")
+        if os.path.exists(BASE_DIR+'/unknown.txt'):
+            os.remove(BASE_DIR + "/unknown.txt")
     return JsonResponse({'ok': 'ok'})
 
 
@@ -163,15 +167,22 @@ def AIState(request):
 
 @csrf_exempt
 def deleteTempFile(request):
-    """  
+    """
         放弃注册删除图片
     """
     global newPic
     try:
         os.remove(BASE_DIR+'/faces/%s' % newPic)
-        os.remove(BASE_DIR + '/user.txt')
     except:
         pass
+    if os.path.exists(BASE_DIR+'/startRecord.txt'):
+        os.remove(BASE_DIR+'/startRecord.txt')
+    if os.path.exists(BASE_DIR+'/name.txt'):
+        os.remove(BASE_DIR+'/name.txt')
+    if os.path.exists(BASE_DIR+'/user.txt'):
+        os.remove(BASE_DIR + "/user.txt")
+    if os.path.exists(BASE_DIR+'/unknown.txt'):
+        os.remove(BASE_DIR + "/unknown.txt")
     return JsonResponse({'res': 'ok'})
 
 
@@ -198,7 +209,7 @@ def addUser(request):
     else:
         res = 'err' """
     os.remove(BASE_DIR+'/unknown.txt')
-    with open(BASE_DIR +"/register.txt", "w") as f:
+    with open(BASE_DIR + "/register.txt", "w") as f:
         f.write('register')
     return JsonResponse({'ok': res})
 
@@ -361,14 +372,14 @@ def loopDB(request):
 @csrf_exempt
 def PLCON(request):
     param = json.loads(request.body)
-    #siemens.WriteBool(param['addr'], 1)
+    # siemens.WriteBool(param['addr'], 1)
     return JsonResponse({'ok': 'ok'})
 
 
 @csrf_exempt
 def PLCOFF(request):
     param = json.loads(request.body)
-    #siemens.WriteBool(param['addr'], 0)
+    # siemens.WriteBool(param['addr'], 0)
     return JsonResponse({'ok': 'ok'})
 
 
