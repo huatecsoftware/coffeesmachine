@@ -90,10 +90,15 @@ export default {
     },
     * closeRegistModal({ _ }, { call, put }) {
       yield call(api.deleteTempFile)
+      yield call(api.intelligenceModel, { checked: false })
       yield put({
         type: 'saveFields',
         restFields: true,
         params: { name: '', phone: '', gender: '', taste: '' },
+      })
+      yield put({
+        type: 'saveSwitch',
+        checked: false
       })
     },
     * recordUserParam({ key, val }, { put, select }) {
@@ -231,7 +236,7 @@ export default {
       const param = yield select(state => state.Index.params)
       const check = yield call(api.addCheck)
       const rcv = check.data.rcv
-      if (rcv.coverNo === 1) {
+      /* if (rcv.coverNo === 1) {
         notification.open({
           message: '杯盖不足',
           description:
@@ -296,7 +301,17 @@ export default {
           type: 'saveStep',
           step: 2
         })
-      }
+      } */
+      yield call(api.addOrder, param)
+      yield put({
+        type: 'saveCheckModal',
+        checkModal: false,
+        nextModal: true
+      })
+      yield put({
+        type: 'saveStep',
+        step: 2
+      })
     },
     * searchOrder({ key, val }, { call, put, select }) {
       const search = yield select(state => state.Index.searchParam)

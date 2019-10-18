@@ -14,11 +14,11 @@ class Order extends React.Component {
         this.lessCol = [{ title: '姓名', dataIndex: 'Uname', key: 'Uname' }, { title: '口味', dataIndex: 'Taste', key: 'Taste' }, { title: '订单号', dataIndex: 'Number', key: 'Number' },]
     }
     componentDidMount() {
-        /* const queryRcv = () => {
+        const queryRcv = () => {
             this.dispatch({
                 type: 'Index/queryRcv'
             })
-        } */
+        }
         //setInterval(queryRcv, 1000)
         const AI = () => {
             this.dispatch({
