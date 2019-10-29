@@ -98,6 +98,7 @@ def addOrder(request):
     '''
         添加新订单，订单默认状态均为进行中
     '''
+    lessOrder = []
     params = json.loads(request.body)
     order = modOrder()
     order.Status = '进行中'
@@ -109,20 +110,12 @@ def addOrder(request):
     order.Stime = datetime.datetime.now()
     order.Etime = datetime.datetime.now()
     order.save()
-    return JsonResponse({'ok': 'ok'})
-
-
-@csrf_exempt
-def failOrder(request):
-    try:
-        key = json.loads(request.body)['key']
-        order = modOrder.objects.get(id=key)
-        order.Status = '失败'
-        order.Etime = datetime.datetime.now()
-        order.save()
-    except:
-        pass
-    return JsonResponse({'ok': 'ok'})
+    ing = modOrder.objects.filter(
+        Q(Status='进行中', Stime__gte=datetime.datetime.now().date())).order_by('Stime')
+    ingList = orderToJson(ing)
+    if len(ingList) != 0:
+        lessOrder = ingList[-3:]
+    return JsonResponse({'ok': 'ok', 'less': lessOrder})
 
 
 proid = ''
@@ -279,97 +272,6 @@ def searchOrder(request):
 
 
 @csrf_exempt
-def logClear(request):
-    '''
-        记录清理时间
-    '''
-    clear = modClear()
-    clear.time = datetime.datetime.now()
-    clear.save()
-    clears = list(modClear.objects.all().values_list(
-        'time', flat=True).distinct())
-    return JsonResponse({'clear': clears[-1]})
-
-
-start, preM130, preRepos = 1, 0, [0, 0, 0, 0, 0]
-
-
-@csrf_exempt
-def loopDB(request):
-    global start, preM130, preRepos
-    param = json.loads(request.body)
-    ing = modOrder.objects.filter(
-        Q(Status='进行中', Stime__gte=datetime.datetime.now().date())).order_by('Stime')
-    finList = orderToJson(modOrder.objects.filter(
-        Q(Status='待取走', Stime__gte=datetime.datetime.now().date())).order_by('Stime'))
-    ingList = orderToJson(ing)
-    try:
-        for i in range(5):
-            errList = modOrder.objects.filter(Q(Pos=(i+1))).order_by('Etime')
-            if len(errList) >= 2:
-                for err in errList[1:]:
-                    err.Pos = 0
-                    err.Status = '进行中'
-                    err.save()
-            if preRepos[i] == 1 and param['rcv']['repos'][i] == 0:
-                try:
-                    order = modOrder.objects.get(Pos=int(i+1))
-                    order.Etime = datetime.datetime.now()
-                    order.Status = '成功'
-                    order.Pos = -1
-                    order.save()
-                except:
-                    pass
-        if len(ing) != 0 and start == 1:
-            order = modOrder.objects.get(id=ing[0].id)
-            with open(BASE_DIR+'\order.txt', 'w') as file:
-                file.write('**********订单信息***********\n')
-                file.write('口味:'+order.Taste+'\n')
-                file.write('单号:'+order.Number+'\n')
-                file.write('手机:'+order.Phone+'\n')
-                file.write('时间:'+str(datetime.datetime.now())[:19]+'\n')
-                file.write('*****************************')
-            if ing[0].Taste == '清咖啡':
-                start = 0
-                """ checkSigWrite(siemens, True)
-                tasteWrite(siemens, True, 1) """
-            if ing[0].Taste == '浓咖啡':
-                start = 0
-                """ checkSigWrite(siemens, True)
-                tasteWrite(siemens, True, 2) """
-        if len(ing) == 0 or int(param['rcv']['cafeFin']) == 1:
-            """ checkSigWrite(siemens, False)
-            tasteWrite(siemens, False) """
-            start = 1
-
-        if param['rcv']['m130'] != 0 and preM130 != param['rcv']['m130']:
-            try:
-                preM130 = int(param['rcv']['m130'])
-                preRepos = param['rcv']['repos']
-                order = modOrder.objects.get(id=ing[0].id)
-                order.Etime = datetime.datetime.now()
-                order.Status = '待取走'
-                order.Pos = int(param['rcv']['m130'])
-                order.save()
-            except:
-                pass
-
-        if param['rcv']['m131'] != 0:
-            try:
-                order = modOrder.objects.get(Pos=int(param['rcv']['m131']))
-                order.Etime = datetime.datetime.now()
-                order.Status = '成功'
-                order.Pos = -1
-                order.save()
-            except:
-                pass
-
-    except:
-        pass
-    return JsonResponse({'ing': ingList, 'fin': finList})
-
-
-@csrf_exempt
 def PLCON(request):
     param = json.loads(request.body)
     # siemens.WriteBool(param['addr'], 1)
@@ -381,28 +283,3 @@ def PLCOFF(request):
     param = json.loads(request.body)
     # siemens.WriteBool(param['addr'], 0)
     return JsonResponse({'ok': 'ok'})
-
-
-rcv = {}
-
-
-@csrf_exempt
-def logRcv(request):
-    global rcv
-    rcv = json.loads(request.body)['rcv']
-    return JsonResponse({'ok': 'ok'})
-
-
-@csrf_exempt
-def addCheck(request):
-    ing = modOrder.objects.filter(
-        Q(Status='进行中', Stime__gte=datetime.datetime.now().date())).order_by('Stime')
-    succ = orderToJson(modOrder.objects.filter(
-        Q(Status='成功', Stime__gte=datetime.datetime.now().date())).order_by('Etime'))
-    ingList = orderToJson(ing)
-    lessOrder = []
-    if len(ingList) == 0:
-        lessOrder = succ[:3]
-    else:
-        lessOrder = ingList[-3:]
-    return JsonResponse({'rcv': rcv, 'less': lessOrder})

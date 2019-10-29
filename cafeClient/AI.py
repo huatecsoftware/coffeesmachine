@@ -17,7 +17,7 @@ import numpy as np
 import urllib.parse
 import urllib.request
 import face_recognition
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 from django.db.models import Q
 from multiprocessing import Process
 from pyaudio import PyAudio, paInt16
@@ -25,12 +25,13 @@ from aliyunsdkcore.client import AcsClient
 from PIL import Image, ImageDraw, ImageFont
 from aliyunsdkcore.request import CommonRequest
 
-sys.path.append('D://work/cafeBack')
-os.environ['DJANGO_SETTINGS_MODULE'] = 'cafeServer.settings'
-django.setup()
-
 BASE_DIR = BASE_DIR = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
+
+
+sys.path.append(BASE_DIR)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'cafeServer.settings'
+django.setup()
 
 cafeType = ''  # 咖啡种类
 onlyOne = True  # 确保临时文件生成一次
