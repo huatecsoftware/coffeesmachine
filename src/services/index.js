@@ -24,21 +24,6 @@ export function searchOrderByVal(param) {
 export function intelligenceModel(param) {
   return requestPOST(`http://${host}:${port}/intelligenceModel/`, param)
 }
-export function loopDB(param) {
-  return requestPOST(`http://${host}:${port}/loopDB/`, param)
-}
-export function logClear(param) {
-  return requestPOST(`http://${host}:${port}/logClear/`, param)
-}
-export function failOrder(param) {
-  return requestPOST(`http://${host}:${port}/failOrder/`, param)
-}
-export function logRcv(param) {
-  return requestPOST(`http://${host}:${port}/logRcv/`, param)
-}
-export function addCheck(param) {
-  return requestPOST(`http://${host}:${port}/addCheck/`, param)
-}
 export function addUser(param) {
   return requestPOST(`http://${host}:${port}/addUser/`, param)
 }

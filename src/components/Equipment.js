@@ -9,6 +9,7 @@ class Equipment extends React.Component {
         this.dispatch = this.props.dispatch
         this.buttons = [{ 'desc': '咖啡机1上电', 'addr': 'M88.0' }, { 'desc': '咖啡机2上电', 'addr': 'M88.1' }, { 'desc': '气缸复位', 'addr': 'M189.0' }, { 'desc': '故障再启动', 'addr': 'M29.7' },]
     }
+
     componentDidMount() {
         if (window.innerWidth > 1300) {
             window.socket.onmessage = (message) => {

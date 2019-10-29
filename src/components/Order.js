@@ -14,12 +14,6 @@ class Order extends React.Component {
         this.lessCol = [{ title: '姓名', dataIndex: 'Uname', key: 'Uname' }, { title: '口味', dataIndex: 'Taste', key: 'Taste' }, { title: '订单号', dataIndex: 'Number', key: 'Number' },]
     }
     componentDidMount() {
-        const queryRcv = () => {
-            this.dispatch({
-                type: 'Index/queryRcv'
-            })
-        }
-        //setInterval(queryRcv, 1000)
         const AI = () => {
             this.dispatch({
                 type: 'Index/isNewUser'
@@ -45,7 +39,7 @@ class Order extends React.Component {
                 </div>
                 <div className={`${styles.right} ${styles.flexCol}`}>
                     <Component.OrderShow lessCol={this.lessCol} lessOrder={lessOrder} />
-                    <Face/>
+                    {/* <Face/> */}
                     <Component.VoicePlot checked={checked} record={record}/>
                 </div>
             </div>

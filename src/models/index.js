@@ -1,5 +1,5 @@
 import * as api from '../services'
-import { notification, message } from 'antd'
+import { message } from 'antd'
 
 
 export default {
@@ -8,7 +8,6 @@ export default {
 
   state: {
     step: 0,
-    error: '',
     hints: [],
     range: [],
     orders: [],
@@ -30,7 +29,6 @@ export default {
     registModal: false,
     repos: [0, 0, 0, 0, 0],
     userParam: { name: '', gender: '', phone: '' },
-    rcv: { repos: [0, 0, 0, 0, 0], m130: 0, guangMu: 0 },
     params: { name: '', phone: '', gender: '', taste: '' },
     searchParam: { '姓名': '', '性别': '', '电话': '', '口味': '', '接单时间': '', '订单号': '', '订单状态': '', '完成时间': '' },
     breads: window.innerWidth > 1300 ? [['shopping-cart', '订单跟踪', 'fllow'], ['table', '订单报表', 'table'], ['pie-chart', '订单绘图', 'chart'], ['robot', '设备状态', 'equipment']] : [['ordered-list', '下单', 'order']],
@@ -178,10 +176,8 @@ export default {
     * checkModalChange({ checkModal }, { put }) {
       yield put({
         type: 'saveCheckModal',
+        nextModal: false,
         checkModal,
-      })
-      yield put({
-        type: 'saveStep',
         step: 1
       })
     },
@@ -224,93 +220,18 @@ export default {
         param
       })
     },
-    * queryRcv({ _ }, { call, put }) {
-      const response = yield call(api.addCheck)
-      yield put({
-        type: 'saveRcv',
-        rcv: response.data.rcv,
-        less: response.data.less
-      })
-    },
     * addOrder({ _ }, { call, put, select }) {
       const param = yield select(state => state.Index.params)
-      const check = yield call(api.addCheck)
-      const rcv = check.data.rcv
-      /* if (rcv.coverNo === 1) {
-        notification.open({
-          message: '杯盖不足',
-          description:
-            '无杯盖，请补充',
-        })
-      } else if (rcv.repos.toString() === [1, 1, 1, 1, 1].toString()) {
-        notification.open({
-          message: '仓位不足',
-          description:
-            '仓位已满，请先取杯',
-        })
-      } else if (rcv.aError === 1) {
-        notification.open({
-          message: '1号机准备未完成',
-          description:
-            '请上电完成后在尝试下单',
-        })
-      } else if (rcv.bError === 1) {
-        notification.open({
-          message: '2号机准备未完成',
-          description:
-            '请上电完成后在尝试下单',
-        })
-      } else if (rcv.cupNo === 1) {
-        notification.open({
-          message: '纸杯不足',
-          description:
-            '无纸杯，请补充',
-        })
-      } else if (rcv.cafe1Material === 1) {
-        notification.open({
-          message: '咖啡豆不足',
-          description:
-            '1号机缺豆，请补充',
-        })
-      } else if (rcv.cafe2Material === 1) {
-        notification.open({
-          message: '咖啡豆不足',
-          description:
-            '2号机缺豆，请补充',
-        })
-      } else if (rcv.cafe1Rubbish === 1) {
-        notification.open({
-          message: '残渣已满',
-          description:
-            '1号机渣满，请清理',
-        })
-      } else if (rcv.cafe2Rubbish === 1) {
-        notification.open({
-          message: '残渣已满',
-          description:
-            '2号机渣满，请清理',
-        })
-      } else {
-        yield call(api.addOrder, param)
-        yield put({
-          type: 'saveCheckModal',
-          checkModal: false,
-          nextModal: true
-        })
-        yield put({
-          type: 'saveStep',
-          step: 2
-        })
-      } */
-      yield call(api.addOrder, param)
+      const response = yield call(api.addOrder, param)
       yield put({
         type: 'saveCheckModal',
         checkModal: false,
-        nextModal: true
+        nextModal: true,
+        step: 2
       })
       yield put({
-        type: 'saveStep',
-        step: 2
+        type:'saveLessOrder',
+        less:response.data.less
       })
     },
     * searchOrder({ key, val }, { call, put, select }) {
@@ -329,8 +250,8 @@ export default {
         equipments
       })
     },
-    * readPLC({ rcv }, { call, put, select }) {
-      yield call(api.logRcv, { rcv })
+    * readPLC({ rcv }, { put, select }) {
+      const messages = []
       let hints = yield select(state => state.Index.hints)
       const ing = yield select(state => state.Index.orderIng)
       const isIng = ing.length > 0 ? '努力加工咖啡中0' : '没有订单哦0'
@@ -409,19 +330,15 @@ export default {
         rcv,
         hints: newHint.length === 1 ? newHint : newHint.filter(item => item !== '努力加工咖啡中0' && item !== '没有订单哦0')
       })
-    },
-    * loopDB({ _ }, { call, put, select }) {
-      const rcv = yield select(state => state.Index.rcv)
-      const response = yield call(api.loopDB, { rcv })
-      const messages = []
-      response.data.fin.forEach(item => {
+
+      rcv.fin.forEach(item => {
         messages.push([item.Uname, item.Gender === '男' ? '先生' : '女士', item.Pos])
       })
       yield put({
         type: 'saveOrderState',
         messages,
-        ing: response.data.ing,
-        fin: response.data.fin,
+        ing: rcv.ing,
+        fin: rcv.fin,
       })
     },
     * changeRestFields({ _ }, { put }) {
@@ -464,13 +381,6 @@ export default {
       return {
         ...state,
         photograph: action.photograph,
-      }
-    },
-    saveRcv(state, action) {
-      return {
-        ...state,
-        rcv: action.rcv,
-        lessOrder: action.less,
       }
     },
     saveFields(state, action) {
@@ -520,6 +430,12 @@ export default {
       return {
         ...state,
         range: action.e,
+      }
+    },
+    saveLessOrder(state, action) {
+      return {
+        ...state,
+        lessOrder: action.less,
       }
     },
     saveStep(state, action) {

@@ -9,12 +9,6 @@ class Follow extends React.Component {
         this.dispatch = this.props.dispatch
     }
     componentDidMount() {
-        const loopDB = () => {
-            this.dispatch({
-                type: 'Index/loopDB',
-            })
-        }
-        setInterval(loopDB, 1500)
         if (window.innerWidth > 1300) {
             window.socket.onmessage = (message) => {
                 const rcv = JSON.parse(message.data)
